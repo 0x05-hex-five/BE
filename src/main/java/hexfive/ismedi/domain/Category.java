@@ -29,4 +29,9 @@ public class Category {
         this.displayName = displayName;
         this.selectName = selectName;
     }
+
+    public void update(String displayName, String selectName) {
+        this.displayName = displayName;
+        this.selectName = selectName;
+    }
 }
