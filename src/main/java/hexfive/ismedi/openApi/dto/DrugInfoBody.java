@@ -5,9 +5,9 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class DrugInfoBody {
+public class DrugInfoBody<T> {
     private int pageNo;
     private int totalCount;
     private int numOfRows;
-    private List<DrugInfoDto> items;
+    private List<T> items;
 }

@@ -7,17 +7,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/drug-info")
+@RequestMapping("/api/fetch")
 public class DrugInfoController {
     private final DrugInfoService drugInfoService;
 
     @RequestMapping("/init")
     public void fetchAll() throws Exception {
-        drugInfoService.fetchAll();
+        drugInfoService.fetchAll(ApiType.DRUG_INFO);
+        drugInfoService.fetchAll2(ApiType.PRESCRIPTION_TYPE);
     }
 
-    @RequestMapping("/{pageNo}")
-    public void fetchPage(@PathVariable int pageNo) throws Exception {
-        drugInfoService.fetchPage(pageNo);
+    @RequestMapping("/{type}/{pageNo}")
+    public void fetchPage(@PathVariable String type, @PathVariable int pageNo) throws Exception {
+        ApiType apiType = ApiType.from(type); // 문자열 -> enum 변환
+        if (apiType == ApiType.DRUG_INFO)
+            drugInfoService.fetchPage(apiType, pageNo);
+        else if (apiType == ApiType.PRESCRIPTION_TYPE)
+            drugInfoService.fetchPage2(apiType, pageNo);
     }
 }
