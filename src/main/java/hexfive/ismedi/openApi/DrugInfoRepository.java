@@ -8,4 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface DrugInfoRepository extends JpaRepository<DrugInfo, Long> {
+    boolean existsByItemSeq(String itemSeq);
 }

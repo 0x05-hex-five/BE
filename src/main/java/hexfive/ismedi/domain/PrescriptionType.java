@@ -23,6 +23,7 @@ public class PrescriptionType {
     private String indutyCodeName;
     private String indutyCode;
     private String itemNo;
+    @Column(unique = true)
     private String itemSeq;
     private String etcOtcCodeName;
     private String classNoName;
