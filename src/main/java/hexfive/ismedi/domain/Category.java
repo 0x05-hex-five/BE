@@ -1,5 +1,6 @@
 package hexfive.ismedi.domain;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,8 @@ import java.util.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "Category")
 public class Category {
     @Id
@@ -23,12 +26,6 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Medicine> medicines;
-
-    @Builder
-    public Category(String displayName, String selectName) {
-        this.displayName = displayName;
-        this.selectName = selectName;
-    }
 
     public void update(String displayName, String selectName) {
         this.displayName = displayName;

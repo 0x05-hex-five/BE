@@ -33,4 +33,5 @@ public class DrugInfo {
     private String seQesitm;
     @Column(length = 2000)
     private String depositMethodQesitm;
+    private String itemImage;
 }

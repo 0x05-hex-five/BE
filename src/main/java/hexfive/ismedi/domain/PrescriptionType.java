@@ -15,6 +15,7 @@ public class PrescriptionType {
     private Long id;
 
     private String entpName;
+    @Column(length = 1000)
     private String itemName;
     private String itemPermitDate;
     private String validTermDate;

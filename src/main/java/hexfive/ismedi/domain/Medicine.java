@@ -1,43 +1,41 @@
 package hexfive.ismedi.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "Medicine")
 public class Medicine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
+    // DrugInfo
     private String entpName;
+    @Column(length = 1000)
+    private String itemName;
+    private String itemSeq;
+    @Column(length = 2000)
+    private String efcyQesitm;
+    @Column(length = 2000)
+    private String useMethodQesitm;
+    @Column(length = 2000)
+    private String atpnQesitm;
+    @Column(length = 2000)
+    private String intrcQesitm;
+    @Column(length = 2000)
+    private String seQesitm;
+    @Column(length = 2000)
+    private String depositMethodQesitm;
 
-    @Column
-    private String efficacy;
-
-    @Column
-    private String method;
-
-    @Column
-    private String warning;
-
-    @Column
-    private String interaction;
-
-    @Column
-    private String sideEffect;
-
-    @Column
-    private String storage;
-
-    @Column
-    private String image;
-
-    @Column
-    private Integer code;
+    // PrescriptionType
+    private String etcOtcCodeName;
+    private String classNoName;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
