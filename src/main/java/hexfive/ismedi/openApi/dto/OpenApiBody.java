@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class DrugInfoBody<T> {
+public class OpenApiBody<T> {
     private int pageNo;
     private int totalCount;
     private int numOfRows;

@@ -9,20 +9,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/fetch")
 public class DrugInfoController {
-    private final DrugInfoService drugInfoService;
+    private final OpenApiService openApiService;
 
     @RequestMapping("/init")
     public void fetchAll() throws Exception {
-        drugInfoService.fetchAll(ApiType.DRUG_INFO);
-        drugInfoService.fetchAll2(ApiType.PRESCRIPTION_TYPE);
+        openApiService.fetchAll(ApiType.DRUG_INFO);
+        openApiService.fetchAll2(ApiType.PRESCRIPTION_TYPE);
     }
 
     @RequestMapping("/{type}/{pageNo}")
     public void fetchPage(@PathVariable String type, @PathVariable int pageNo) throws Exception {
         ApiType apiType = ApiType.from(type); // 문자열 -> enum 변환
         if (apiType == ApiType.DRUG_INFO)
-            drugInfoService.fetchPage(apiType, pageNo);
+            openApiService.fetchPage(apiType, pageNo);
         else if (apiType == ApiType.PRESCRIPTION_TYPE)
-            drugInfoService.fetchPage2(apiType, pageNo);
+            openApiService.fetchPage2(apiType, pageNo);
     }
 }

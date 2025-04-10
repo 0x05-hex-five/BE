@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.domain.DrugInfo;
 import hexfive.ismedi.domain.PrescriptionType;
 import hexfive.ismedi.openApi.dto.DrugInfoDto;
-import hexfive.ismedi.openApi.dto.LocalDataResponse;
+import hexfive.ismedi.openApi.dto.OpenApiResponse;
 import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DrugInfoService {
+public class OpenApiService {
     private final DrugInfoRepository drugInfoRepository;
     private final PrescriptionTypeRepository prescriptionTypeRepository;
     private final ObjectMapper objectMapper;
@@ -36,7 +36,7 @@ public class DrugInfoService {
         int totalSaved = 0;
 
         do {
-            LocalDataResponse<DrugInfoDto> response = fetch(apiType, pageNo);
+            OpenApiResponse<DrugInfoDto> response = fetch(apiType, pageNo);
             totalCount = response.getBody().getTotalCount();
             List<DrugInfoDto> items = response.getBody().getItems();
 
@@ -58,7 +58,7 @@ public class DrugInfoService {
 
     // 페이지별 수집 - DRUG_INFO
     public void fetchPage(ApiType apitype, int pageNo) throws Exception {
-        LocalDataResponse<DrugInfoDto> response = fetch(apitype, pageNo);
+        OpenApiResponse<DrugInfoDto> response = fetch(apitype, pageNo);
         List<DrugInfoDto> items = response.getBody().getItems();
 
         List<DrugInfo> entities = items.stream()
@@ -76,7 +76,7 @@ public class DrugInfoService {
         int totalSaved = 0;
 
         do {
-            LocalDataResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
+            OpenApiResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
             totalCount = response.getBody().getTotalCount();
             List<PrescriptionTypeDto> items = response.getBody().getItems();
 
@@ -100,7 +100,7 @@ public class DrugInfoService {
 
     // 페이지별 수집 - PRESCRIPTION_TYPE
     public void fetchPage2(ApiType apiType, int pageNo) throws Exception {
-        LocalDataResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
+        OpenApiResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
         List<PrescriptionTypeDto> items = response.getBody().getItems();
 
         List<PrescriptionType> entities = items.stream()
@@ -112,7 +112,7 @@ public class DrugInfoService {
     }
 
     // 공통 호출 로직
-    private <T> LocalDataResponse<T> fetch(ApiType apiType, int pageNo) throws Exception {
+    private <T> OpenApiResponse<T> fetch(ApiType apiType, int pageNo) throws Exception {
         String apiUrl = apiType.getUrl();
         String type = "json";
         String uriStr = String.format("%s?serviceKey=%s&pageNo=%d&numOfRows=%d&type=%s",
@@ -125,7 +125,7 @@ public class DrugInfoService {
         String jsonResponse = template.getForObject(uri, String.class);
 
         JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(LocalDataResponse.class, apiType.getDtoClass());
+                .constructParametricType(OpenApiResponse.class, apiType.getDtoClass());
 
         return objectMapper.readValue(jsonResponse, javaType);
     }
