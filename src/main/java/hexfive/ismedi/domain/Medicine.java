@@ -19,6 +19,7 @@ public class Medicine {
     private String entpName;
     @Column(length = 1000)
     private String itemName;
+    @Column(unique = true)
     private String itemSeq;
     @Column(length = 2000)
     private String efcyQesitm;
@@ -32,12 +33,13 @@ public class Medicine {
     private String seQesitm;
     @Column(length = 2000)
     private String depositMethodQesitm;
+    private String itemImage;
 
     // PrescriptionType
     private String etcOtcCodeName;
     private String classNoName;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+//    @ManyToOne
+//    @JoinColumn(name = "category_id", nullable = true)
+//    private Category category;
 }

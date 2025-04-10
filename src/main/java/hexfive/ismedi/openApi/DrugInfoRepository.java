@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface DrugInfoRepository extends JpaRepository<DrugInfo, Long> {
-    Optional<DrugInfo> findByItemSeq(String itemSeq);
 }

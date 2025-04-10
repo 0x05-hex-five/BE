@@ -20,13 +20,13 @@ public class MedicineService {
     private final MedicineRepository medicineRepository;
 
     public void mergeToMedicineTable() {
-        List<PrescriptionType> prescriptions = prescriptionTypeRepository.findAll();
+        List<DrugInfo> drugInfos = drugInfoRepository.findAll();
 
-        for (PrescriptionType pt : prescriptions) {
-            String itemSeq = pt.getItemSeq();
-            Optional<DrugInfo> optionalDrugInfo = drugInfoRepository.findByItemSeq(itemSeq);
+        for (DrugInfo di : drugInfos) {
+            String itemSeq = di.getItemSeq();
+            Optional<PrescriptionType> optionalPresc = prescriptionTypeRepository.findByItemSeq(itemSeq);
 
-            optionalDrugInfo.ifPresent(drugInfo -> {
+            optionalPresc.ifPresent(pt -> {
                 Medicine medicine = Medicine.builder()
                         .itemSeq(itemSeq)
                         .entpName(pt.getEntpName())
@@ -34,12 +34,12 @@ public class MedicineService {
                         .etcOtcCodeName(pt.getEtcOtcCodeName())
                         .classNoName(pt.getClassNoName())
 
-                        .efcyQesitm(drugInfo.getEfcyQesitm())
-                        .useMethodQesitm(drugInfo.getUseMethodQesitm())
-                        .atpnQesitm(drugInfo.getAtpnQesitm())
-                        .intrcQesitm(drugInfo.getIntrcQesitm())
-                        .seQesitm(drugInfo.getSeQesitm())
-                        .depositMethodQesitm(drugInfo.getDepositMethodQesitm())
+                        .efcyQesitm(di.getEfcyQesitm())
+                        .useMethodQesitm(di.getUseMethodQesitm())
+                        .atpnQesitm(di.getAtpnQesitm())
+                        .intrcQesitm(di.getIntrcQesitm())
+                        .seQesitm(di.getSeQesitm())
+                        .depositMethodQesitm(di.getDepositMethodQesitm())
                         .build();
 
                 medicineRepository.save(medicine);

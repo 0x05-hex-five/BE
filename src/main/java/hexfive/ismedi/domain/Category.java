@@ -24,8 +24,8 @@ public class Category {
     @Column(nullable = false)
     private String selectName;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Medicine> medicines;
+//    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+//    private List<Medicine> medicines;
 
     public void update(String displayName, String selectName) {
         this.displayName = displayName;
