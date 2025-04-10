@@ -14,24 +14,30 @@ import lombok.NoArgsConstructor;
 @Getter
 public class DrugInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String itemSeq;
 
     private String entpName;
+
     @Column(length = 1000)
     private String itemName;
-    private String itemSeq;
+
     @Column(length = 2000)
     private String efcyQesitm;
+
     @Column(length = 2000)
     private String useMethodQesitm;
+
     @Column(length = 2000)
     private String atpnQesitm;
+
     @Column(length = 2000)
     private String intrcQesitm;
+
     @Column(length = 2000)
     private String seQesitm;
+
     @Column(length = 2000)
     private String depositMethodQesitm;
+
     private String itemImage;
 }

@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
-import hexfive.ismedi.openApi.data.drugInfo.DrugInfoDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
-import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeDto;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,19 +61,11 @@ public class OpenAPIService {
 
     // 페이지별 수집 - DRUG_INFO
     public PageResult fetchDrugInfoPage(APIType apiType, int pageNo) throws Exception {
-        OpenAPIResponse<DrugInfoDto> response = fetch(apiType, pageNo);
-        List<DrugInfoDto> items = response.getBody().getItems();
+        OpenAPIResponse<DrugInfo> response = fetch(apiType, pageNo);
+        List<DrugInfo> items = response.getBody().getItems();
 
         List<DrugInfo> toSave = items.stream()
-                .filter(dto -> {
-                    boolean exists = drugInfoRepository.existsByItemSeq(dto.getItemSeq());
-                    if (exists) {
-                        log.info("[중복] itemSeq={} 저장 스킵", dto.getItemSeq());
-                        return false;
-                    }
-                    return true;
-                })
-                .map(DrugInfoDto::toEntity)
+                .filter(item -> !drugInfoRepository.existsById(item.getItemSeq()))
                 .collect(Collectors.toList());
 
         drugInfoRepository.saveAll(toSave);
@@ -84,19 +75,11 @@ public class OpenAPIService {
 
     // 페이지별 수집 - PRESCRIPTION_TYPE
     public PageResult fetchPrescriptionTypePage(APIType apiType, int pageNo) throws Exception {
-        OpenAPIResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
-        List<PrescriptionTypeDto> items = response.getBody().getItems();
+        OpenAPIResponse<PrescriptionType> response = fetch(apiType, pageNo);
+        List<PrescriptionType> items = response.getBody().getItems();
 
         List<PrescriptionType> toSave = items.stream()
-                .filter(dto -> {
-                    boolean exists = prescriptionTypeRepository.existsByItemSeq(dto.getItemSeq());
-                    if (exists) {
-                        log.info("[중복] itemSeq={} 저장 스킵", dto.getItemSeq());
-                        return false;
-                    }
-                    return true;
-                })
-                .map(PrescriptionTypeDto::toEntity)
+                .filter(item -> !prescriptionTypeRepository.existsById(item.getItemSeq()))
                 .collect(Collectors.toList());
 
         prescriptionTypeRepository.saveAll(toSave);
@@ -118,7 +101,7 @@ public class OpenAPIService {
         String jsonResponse = template.getForObject(uri, String.class);
 
         JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(OpenAPIResponse.class, apiType.getDtoClass());
+                .constructParametricType(OpenAPIResponse.class, apiType.getEntity());
 
         return objectMapper.readValue(jsonResponse, javaType);
     }

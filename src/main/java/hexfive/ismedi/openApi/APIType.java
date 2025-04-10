@@ -1,7 +1,7 @@
 package hexfive.ismedi.openApi;
 
-import hexfive.ismedi.openApi.data.drugInfo.DrugInfoDto;
-import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeDto;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,16 +13,16 @@ public enum APIType {
     DRUG_INFO(
             "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList",
             "drug-info",
-            DrugInfoDto.class
+            DrugInfo.class
     ),
     PRESCRIPTION_TYPE(
             "http://apis.data.go.kr/1471000/DrugPrdlstVldPrdInfoService01/getDrugPrdlstVldPrdInfoService01",
             "prescription-type",
-            PrescriptionTypeDto.class
+            PrescriptionType.class
     );
     private final String url;
     private final String typeName;
-    private final Class<?> dtoClass;
+    private final Class<?> entity;
 
     public static APIType from(String type) {
         return Arrays.stream(values())
