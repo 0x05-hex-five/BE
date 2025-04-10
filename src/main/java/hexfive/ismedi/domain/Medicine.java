@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 @Table(name = "Medicine")
 public class Medicine {
     @Id
@@ -32,12 +34,13 @@ public class Medicine {
     private String seQesitm;
     @Column(length = 2000)
     private String depositMethodQesitm;
+    private String itemImage;
 
     // PrescriptionType
     private String etcOtcCodeName;
     private String classNoName;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+//    @ManyToOne
+//    @JoinColumn(name = "category_id", nullable = false)
+//    private Category category;
 }

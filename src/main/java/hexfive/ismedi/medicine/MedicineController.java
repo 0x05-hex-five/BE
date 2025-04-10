@@ -13,7 +13,7 @@ public class MedicineController {
     private final MedicineService medicineService;
 
     @GetMapping("/init")
-    public void mergeMedicineData() {
-        medicineService.mergeToMedicineTable();
+    public void mergeMedicineData() throws Exception {
+        medicineService.setMedicineData();
     }
 }

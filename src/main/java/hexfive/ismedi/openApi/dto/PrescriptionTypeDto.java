@@ -1,6 +1,7 @@
 package hexfive.ismedi.openApi.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import hexfive.ismedi.domain.Medicine;
 import hexfive.ismedi.domain.PrescriptionType;
 import lombok.Getter;
 
@@ -46,21 +47,8 @@ public class PrescriptionTypeDto {
     @JsonProperty("BIZRNO")
     private String bizrno;
 
-    public PrescriptionType toEntity() {
-        return PrescriptionType.builder()
-                .entpName(entpName)
-                .itemName(itemName)
-                .itemPermitDate(itemPermitDate)
-                .validTermDate(validTermDate)
-                .validTermDateCutline(validTermDateCutline)
-                .indutyCodeName(indutyCodeName)
-                .indutyCode(indutyCode)
-                .itemNo(itemNo)
-                .itemSeq(itemSeq)
-                .etcOtcCodeName(etcOtcCodeName)
-                .classNoName(classNoName)
-                .permitKindCodeName(permitKindCodeName)
-                .bizrno(bizrno)
-                .build();
+    public void applyTo(Medicine medicine) {
+        medicine.setEtcOtcCodeName(this.etcOtcCodeName);
+        medicine.setClassNoName(this.classNoName);
     }
 }

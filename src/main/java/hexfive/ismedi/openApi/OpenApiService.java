@@ -2,8 +2,6 @@ package hexfive.ismedi.openApi;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexfive.ismedi.domain.DrugInfo;
-import hexfive.ismedi.domain.PrescriptionType;
 import hexfive.ismedi.openApi.dto.DrugInfoDto;
 import hexfive.ismedi.openApi.dto.OpenApiResponse;
 import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
@@ -14,38 +12,39 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpenApiService {
-    private final DrugInfoRepository drugInfoRepository;
-    private final PrescriptionTypeRepository prescriptionTypeRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api.key}")
     private String serviceKey;
     private int MAX_ROW_CNT = 100;
 
-    // 전체 데이터 수집 - DRUG_INFO
-    public void fetchAll(ApiType apiType) throws Exception {
+    // DRUG_INFO 전체 데이터 반환
+    public List<DrugInfoDto> getDrugInfoDtoList(ApiType apiType) throws Exception {
+        List<DrugInfoDto> drugInfoDtoList = new ArrayList<>();
         int pageNo = 1;
         int totalCount;
         int totalSaved = 0;
 
         do {
-            OpenApiResponse<DrugInfoDto> response = fetch(apiType, pageNo);
+            Map<String, String> params = new HashMap<>();
+            params.put("pageNo", String.valueOf(pageNo));
+            params.put("numOfRows", String.valueOf(MAX_ROW_CNT));
+
+            OpenApiResponse<DrugInfoDto> response = fetch(apiType, params);
             totalCount = response.getBody().getTotalCount();
             List<DrugInfoDto> items = response.getBody().getItems();
 
-            List<DrugInfo> entities = items.stream()
-                    .map(DrugInfoDto::toEntity)
-                    .collect(Collectors.toList());
-
-            drugInfoRepository.saveAll(entities);
-            totalSaved += entities.size();
+            drugInfoDtoList.addAll(items);
+            totalSaved += items.size();
             log.info("[{}페이지] 전체 저장 개수: {}", pageNo, totalSaved);
 
             pageNo++;
@@ -54,72 +53,59 @@ public class OpenApiService {
         if (totalSaved != totalCount) {
             throw new IllegalStateException(String.format("저장된 건수 : %d / 전체 건수 : %d - 불일치", totalSaved, totalCount));
         }
+        return drugInfoDtoList;
     }
 
-    // 페이지별 수집 - DRUG_INFO
-    public void fetchPage(ApiType apitype, int pageNo) throws Exception {
-        OpenApiResponse<DrugInfoDto> response = fetch(apitype, pageNo);
-        List<DrugInfoDto> items = response.getBody().getItems();
+    // ITEM_NAME에 따른 PRESCRIPTION_TYPE 데이터 반환
+    public PrescriptionTypeDto getPrescriptionTypeDtoByItemName(String itemName) throws Exception {
+        // 특수 기호, 숫자 제외 (인코딩 오류 방지)
+        String searchName = itemName.split("[^\\p{IsHangul}\\p{IsAlphabetic}]")[0];
 
-        List<DrugInfo> entities = items.stream()
-                .map(DrugInfoDto::toEntity)
-                .collect(Collectors.toList());
+        Map<String, String> params = new HashMap<>();
+        params.put("ITEM_NAME", searchName);
 
-        drugInfoRepository.saveAll(entities);
-        log.info("[{}페이지] 저장한 약 정보 수: {}", pageNo, entities.size());
-    }
-
-    // 전체 데이터 수집 - PRESCRIPTION_TYPE
-    public void fetchAll2(ApiType apiType) throws Exception {
-        int pageNo = 1;
-        int totalCount;
-        int totalSaved = 0;
-
-        do {
-            OpenApiResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
-            totalCount = response.getBody().getTotalCount();
-            List<PrescriptionTypeDto> items = response.getBody().getItems();
-
-            List<PrescriptionType> entities = items.stream()
-                    .map(PrescriptionTypeDto::toEntity)
-                    .collect(Collectors.toList());
-
-            prescriptionTypeRepository.saveAll(entities);
-            totalSaved += entities.size();
-            log.info("[{}페이지] 누적 저장: {}", pageNo, totalSaved);
-
-            pageNo++;
-        } while ((pageNo - 1) * MAX_ROW_CNT < totalCount);
-
-        if (totalSaved != totalCount) {
-            throw new IllegalStateException(String.format(
-                    "저장된 건수 : %d / 전체 건수 : %d - 불일치", totalSaved, totalCount
-            ));
-        }
-    }
-
-    // 페이지별 수집 - PRESCRIPTION_TYPE
-    public void fetchPage2(ApiType apiType, int pageNo) throws Exception {
-        OpenApiResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
+        OpenApiResponse<PrescriptionTypeDto> response = fetch(ApiType.PRESCRIPTION_TYPE, params);
         List<PrescriptionTypeDto> items = response.getBody().getItems();
 
-        List<PrescriptionType> entities = items.stream()
-                .map(PrescriptionTypeDto::toEntity)
-                .collect(Collectors.toList());
+        if (items.size() != 1) {
+            List<String> itemNames = items.stream()
+                    .map(PrescriptionTypeDto::getItemName)
+                    .collect(Collectors.toList());
+            log.warn("[itemName {}] 약품명 목록: {}", itemName, itemNames);
+        }
 
-        prescriptionTypeRepository.saveAll(entities);
-        log.info("[{}페이지] 저장 완료: {}건", pageNo, entities.size());
+        // 제품명이 완전 일치하는 항목
+        Optional<PrescriptionTypeDto> exactMatch = items.stream()
+                .filter(item -> itemName.equals(item.getItemName()))
+                .findFirst();
+
+        // 일치하는 항목이 없으면 제품명이 짧은 것 먼저 매칭
+        return exactMatch.orElseGet(() ->
+                items.stream()
+                        .min(Comparator.comparingInt(item -> item.getItemName().length()))
+                        .orElse(null)
+        );
     }
 
     // 공통 호출 로직
-    private <T> OpenApiResponse<T> fetch(ApiType apiType, int pageNo) throws Exception {
-        String apiUrl = apiType.getUrl();
-        String type = "json";
-        String uriStr = String.format("%s?serviceKey=%s&pageNo=%d&numOfRows=%d&type=%s",
-                apiUrl, serviceKey, pageNo, MAX_ROW_CNT, type);
+    private <T> OpenApiResponse<T> fetch(ApiType apiType, Map<String, String> queryParams) throws Exception {
+        StringBuilder uriBuilder = new StringBuilder();
+        uriBuilder.append(apiType.getUrl());
+        uriBuilder.append("?serviceKey=").append(serviceKey);
+        uriBuilder.append("&type=json");
 
-        URI uri = new URI(uriStr);
-        log.info("uri: {}", uri);
+        if (queryParams != null) {
+            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                String encodedValue = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString());
+                uriBuilder.append("&")
+                        .append(entry.getKey())
+                        .append("=")
+                        .append(encodedValue);
+            }
+        }
+
+        URI uri = new URI(uriBuilder.toString());
+        log.info("uri: {}", uri.toString());
 
         RestTemplate template = new RestTemplate();
         String jsonResponse = template.getForObject(uri, String.class);

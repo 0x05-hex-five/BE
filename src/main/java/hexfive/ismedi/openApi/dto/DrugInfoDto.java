@@ -1,6 +1,6 @@
 package hexfive.ismedi.openApi.dto;
 
-import hexfive.ismedi.domain.DrugInfo;
+import hexfive.ismedi.domain.Medicine;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,9 +16,10 @@ public class DrugInfoDto {
     private String intrcQesitm;    // 상호작용
     private String seQesitm;       // 부작용
     private String depositMethodQesitm; // 보관법
+    private String itemImage;      // 낱알이미지
 
-    public DrugInfo toEntity() {
-        return DrugInfo.builder()
+    public Medicine toMedicine() {
+        return Medicine.builder()
                 .entpName(entpName)
                 .itemName(itemName)
                 .itemSeq(itemSeq)
@@ -28,6 +29,7 @@ public class DrugInfoDto {
                 .intrcQesitm(intrcQesitm)
                 .seQesitm(seQesitm)
                 .depositMethodQesitm(depositMethodQesitm)
+                .itemImage(itemImage)
                 .build();
     }
 }

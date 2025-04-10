@@ -1,49 +1,39 @@
 package hexfive.ismedi.medicine;
 
-import hexfive.ismedi.domain.DrugInfo;
 import hexfive.ismedi.domain.Medicine;
-import hexfive.ismedi.domain.PrescriptionType;
-import hexfive.ismedi.openApi.DrugInfoRepository;
-import hexfive.ismedi.openApi.PrescriptionTypeRepository;
+import hexfive.ismedi.openApi.ApiType;
+import hexfive.ismedi.openApi.OpenApiService;
+import hexfive.ismedi.openApi.dto.DrugInfoDto;
+import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MedicineService {
-
-    private final PrescriptionTypeRepository prescriptionTypeRepository;
-    private final DrugInfoRepository drugInfoRepository;
+    private final OpenApiService openApiService;
     private final MedicineRepository medicineRepository;
 
-    public void mergeToMedicineTable() {
-        List<PrescriptionType> prescriptions = prescriptionTypeRepository.findAll();
+    public void setMedicineData() throws Exception {
+        List<Medicine> medicines = new ArrayList<>();
+        List<DrugInfoDto> drugInfoList = openApiService.getDrugInfoDtoList(ApiType.DRUG_INFO);
 
-        for (PrescriptionType pt : prescriptions) {
-            String itemSeq = pt.getItemSeq();
-            Optional<DrugInfo> optionalDrugInfo = drugInfoRepository.findByItemSeq(itemSeq);
-
-            optionalDrugInfo.ifPresent(drugInfo -> {
-                Medicine medicine = Medicine.builder()
-                        .itemSeq(itemSeq)
-                        .entpName(pt.getEntpName())
-                        .itemName(pt.getItemName())
-                        .etcOtcCodeName(pt.getEtcOtcCodeName())
-                        .classNoName(pt.getClassNoName())
-
-                        .efcyQesitm(drugInfo.getEfcyQesitm())
-                        .useMethodQesitm(drugInfo.getUseMethodQesitm())
-                        .atpnQesitm(drugInfo.getAtpnQesitm())
-                        .intrcQesitm(drugInfo.getIntrcQesitm())
-                        .seQesitm(drugInfo.getSeQesitm())
-                        .depositMethodQesitm(drugInfo.getDepositMethodQesitm())
-                        .build();
-
-                medicineRepository.save(medicine);
-            });
+        for (DrugInfoDto drugInfo : drugInfoList) {
+            Medicine medicine = drugInfo.toMedicine();
+            try {
+                PrescriptionTypeDto prescTypeDto = openApiService.getPrescriptionTypeDtoByItemName(drugInfo.getItemName());
+                prescTypeDto.applyTo(medicine);
+            } catch (Exception e) {
+                log.warn("분류 데이터 조회 실패: itemName = {}", drugInfo.getItemName());
+            }
+            medicines.add(medicine);
         }
+        log.info("drugInfo 개수: {}개 / 저장된 약 개수: {}개", drugInfoList.size(), medicines.size());
+        medicineRepository.saveAll(medicines);
     }
 }
