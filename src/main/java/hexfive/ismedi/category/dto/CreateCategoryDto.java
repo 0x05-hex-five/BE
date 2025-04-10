@@ -1,10 +1,8 @@
 package hexfive.ismedi.category.dto;
 
-import hexfive.ismedi.domain.Category;
+import hexfive.ismedi.category.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 

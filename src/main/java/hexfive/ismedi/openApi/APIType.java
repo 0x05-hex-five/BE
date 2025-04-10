@@ -1,7 +1,7 @@
 package hexfive.ismedi.openApi;
 
-import hexfive.ismedi.openApi.dto.DrugInfoDto;
-import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfoDto;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

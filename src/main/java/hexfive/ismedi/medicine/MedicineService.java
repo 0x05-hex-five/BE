@@ -1,10 +1,9 @@
 package hexfive.ismedi.medicine;
 
-import hexfive.ismedi.domain.DrugInfo;
-import hexfive.ismedi.domain.Medicine;
-import hexfive.ismedi.domain.PrescriptionType;
-import hexfive.ismedi.openApi.DrugInfoRepository;
-import hexfive.ismedi.openApi.PrescriptionTypeRepository;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +26,7 @@ public class MedicineService {
             Optional<PrescriptionType> optionalPresc = prescriptionTypeRepository.findByItemSeq(itemSeq);
 
             optionalPresc.ifPresent(pt -> {
-                Medicine medicine = Medicine.builder()
+                MedicineController.Medicine medicine = MedicineController.Medicine.builder()
                         .itemSeq(itemSeq)
                         .entpName(pt.getEntpName())
                         .itemName(pt.getItemName())

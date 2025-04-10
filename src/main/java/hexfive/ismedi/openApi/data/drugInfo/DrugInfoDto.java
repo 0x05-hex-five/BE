@@ -1,6 +1,5 @@
-package hexfive.ismedi.openApi.dto;
+package hexfive.ismedi.openApi.data.drugInfo;
 
-import hexfive.ismedi.domain.DrugInfo;
 import lombok.Getter;
 import lombok.Setter;
 

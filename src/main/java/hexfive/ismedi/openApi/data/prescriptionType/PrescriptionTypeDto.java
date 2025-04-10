@@ -1,7 +1,6 @@
-package hexfive.ismedi.openApi.dto;
+package hexfive.ismedi.openApi.data.prescriptionType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import hexfive.ismedi.domain.PrescriptionType;
 import lombok.Getter;
 
 @Getter

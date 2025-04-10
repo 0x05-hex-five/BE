@@ -1,6 +1,6 @@
 package hexfive.ismedi.category.dto;
 
-import hexfive.ismedi.domain.Category;
+import hexfive.ismedi.category.Category;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

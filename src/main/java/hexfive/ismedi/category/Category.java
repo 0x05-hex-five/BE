@@ -1,4 +1,4 @@
-package hexfive.ismedi.domain;
+package hexfive.ismedi.category;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

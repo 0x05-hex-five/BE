@@ -1,4 +1,4 @@
-package hexfive.ismedi.domain;
+package hexfive.ismedi.openApi.data.prescriptionType;
 
 import jakarta.persistence.*;
 import lombok.*;

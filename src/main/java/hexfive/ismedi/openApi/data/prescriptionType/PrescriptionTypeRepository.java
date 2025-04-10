@@ -1,7 +1,5 @@
-package hexfive.ismedi.openApi;
+package hexfive.ismedi.openApi.data.prescriptionType;
 
-import hexfive.ismedi.domain.DrugInfo;
-import hexfive.ismedi.domain.PrescriptionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

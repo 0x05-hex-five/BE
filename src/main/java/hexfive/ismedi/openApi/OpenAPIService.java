@@ -2,11 +2,13 @@ package hexfive.ismedi.openApi;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexfive.ismedi.domain.DrugInfo;
-import hexfive.ismedi.domain.PrescriptionType;
-import hexfive.ismedi.openApi.dto.DrugInfoDto;
-import hexfive.ismedi.openApi.dto.LocalDataResponse;
-import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfoDto;
+import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
+import hexfive.ismedi.openApi.dto.OpenAPIResponse;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeDto;
+import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +62,7 @@ public class OpenAPIService {
 
     // 페이지별 수집 - DRUG_INFO
     public PageResult fetchDrugInfoPage(APIType apiType, int pageNo) throws Exception {
-        LocalDataResponse<DrugInfoDto> response = fetch(apiType, pageNo);
+        OpenAPIResponse<DrugInfoDto> response = fetch(apiType, pageNo);
         List<DrugInfoDto> items = response.getBody().getItems();
 
         List<DrugInfo> toSave = items.stream()
@@ -82,7 +84,7 @@ public class OpenAPIService {
 
     // 페이지별 수집 - PRESCRIPTION_TYPE
     public PageResult fetchPrescriptionTypePage(APIType apiType, int pageNo) throws Exception {
-        LocalDataResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
+        OpenAPIResponse<PrescriptionTypeDto> response = fetch(apiType, pageNo);
         List<PrescriptionTypeDto> items = response.getBody().getItems();
 
         List<PrescriptionType> toSave = items.stream()
@@ -103,7 +105,7 @@ public class OpenAPIService {
     }
 
     // 공통 호출 로직
-    private <T> LocalDataResponse<T> fetch(APIType apiType, int pageNo) throws Exception {
+    private <T> OpenAPIResponse<T> fetch(APIType apiType, int pageNo) throws Exception {
         String apiUrl = apiType.getUrl();
         String type = "json";
         String uriStr = String.format("%s?serviceKey=%s&pageNo=%d&numOfRows=%d&type=%s",
@@ -116,7 +118,7 @@ public class OpenAPIService {
         String jsonResponse = template.getForObject(uri, String.class);
 
         JavaType javaType = objectMapper.getTypeFactory()
-                .constructParametricType(LocalDataResponse.class, apiType.getDtoClass());
+                .constructParametricType(OpenAPIResponse.class, apiType.getDtoClass());
 
         return objectMapper.readValue(jsonResponse, javaType);
     }
