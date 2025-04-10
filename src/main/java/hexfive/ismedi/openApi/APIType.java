@@ -4,13 +4,12 @@ import hexfive.ismedi.openApi.dto.DrugInfoDto;
 import hexfive.ismedi.openApi.dto.PrescriptionTypeDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
 
 @AllArgsConstructor
 @Getter
-public enum ApiType {
+public enum APIType {
     DRUG_INFO(
             "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList",
             "drug-info",
@@ -25,7 +24,7 @@ public enum ApiType {
     private final String typeName;
     private final Class<?> dtoClass;
 
-    public static ApiType from(String type) {
+    public static APIType from(String type) {
         return Arrays.stream(values())
                 .filter(apiType -> apiType.typeName.equalsIgnoreCase(type))
                 .findFirst()
