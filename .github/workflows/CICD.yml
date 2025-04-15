@@ -3,7 +3,7 @@ name: ismedi CI/CD
 on:
   push:
     branches:
-      - infra/9-cicd
+      - main
 
 jobs:
   build-and-deploy:
