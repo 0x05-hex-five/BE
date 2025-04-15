@@ -7,12 +7,16 @@ cd $APP_DIR
 
 echo "[1] docker 설치 확인"
 if ! command -v docker &> /dev/null; then
-  curl -fsSL https://get.docker.com -o get-docker.sh
-  sh get-docker.sh
+    sudo yum update -y
+    sudo amazon-linux-extras enable docker
+    sudo yum install docker -y
+    sudo systemctl start docker
+    sudo systemctl enable docker
 fi
 
 echo "[2] docker-compose 설치 확인"
 if ! command -v docker-compose &> /dev/null; then
+  echo "Docker Compose 설치 중"
   sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
 fi
