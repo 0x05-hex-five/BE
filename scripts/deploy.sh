@@ -20,7 +20,7 @@ fi
 echo "[2] docker-compose 설치 완료"
 
 echo "[3] 컨테이너 재시작"
-DB_ROOT_PASSWORD=$1 DB_USER_PASSWORD=$2 docker compose pull
-DB_ROOT_PASSWORD=$1 DB_USER_PASSWORD=$2 docker compose up -d
+DB_ROOT_PASSWORD=$1 DB_USER_PASSWORD=$2 docker-compose pull
+DB_ROOT_PASSWORD=$1 DB_USER_PASSWORD=$2 docker-compose up -d
 
 echo "[✅ 배포 완료]"
