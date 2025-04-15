@@ -20,7 +20,8 @@ fi
 echo "[2] docker-compose 설치 완료"
 
 echo "[3] 컨테이너 재시작"
-DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" sudo docker-compose pull
-DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" sudo docker-compose up -d
+docker-compose down
+DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" docker-compose pull
+DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" docker-compose up -d
 
 echo "[✅ 배포 완료]"
