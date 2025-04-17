@@ -1,9 +1,11 @@
 package hexfive.ismedi.medicine;
 
+import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,4 +18,13 @@ public class MedicineController {
     public void mergeMedicineData() {
         medicineService.mergeToMedicineTable();
     }
+
+    @GetMapping("")
+    public APIResponse<List<ResMedicineDto>> getCategory(
+            @RequestParam(required = false, defaultValue = "") String name,    // 검색한 의약품명
+            @RequestParam(defaultValue = "ALL") MedicineType type              // 전문/일반 의약품
+    ) {
+        return APIResponse.success(medicineService.getMedicines(name, type));
+    }
+
 }

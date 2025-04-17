@@ -1,10 +1,12 @@
 package hexfive.ismedi.medicine;
 
+import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MedicineService {
 
     private final PrescriptionTypeRepository prescriptionTypeRepository;
@@ -44,5 +47,26 @@ public class MedicineService {
                 medicineRepository.save(medicine);
             });
         }
+    }
+
+    public List<ResMedicineDto> getMedicines(String name, MedicineType type) {
+        List<Medicine> medicines;
+        if (type.isAll() && name.isBlank()) {
+            medicines = medicineRepository.findAll();
+        } else if (type.isAll()) {
+            medicines = medicineRepository.findAllByItemNameContaining(name);
+        } else if (name.isBlank()) {
+            medicines = medicineRepository.findAllByEtcOtcCodeName(type.getValue());
+        } else {
+            medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCodeName(name, type.getValue());
+        }
+
+        for (Medicine medicine: medicines) {
+            log.info("{}", medicine);
+        }
+
+        return medicines.stream()
+                .map(ResMedicineDto::fromEntity)
+                .toList();
     }
 }
