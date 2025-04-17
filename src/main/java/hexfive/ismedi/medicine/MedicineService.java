@@ -26,7 +26,7 @@ public class MedicineService {
             Optional<PrescriptionType> optionalPresc = prescriptionTypeRepository.findByItemSeq(itemSeq);
 
             optionalPresc.ifPresent(pt -> {
-                MedicineController.Medicine medicine = MedicineController.Medicine.builder()
+                Medicine medicine = Medicine.builder()
                         .itemSeq(itemSeq)
                         .entpName(pt.getEntpName())
                         .itemName(pt.getItemName())
