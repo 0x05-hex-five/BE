@@ -1,5 +1,6 @@
 package hexfive.ismedi.domain;
 
+import hexfive.ismedi.medicine.MedicineController;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,5 +16,5 @@ public class Favorite {
 
     @ManyToOne
     @JoinColumn(name = "medicine_id", nullable = false)
-    private Medicine medicine;
+    private MedicineController.Medicine medicine;
 }

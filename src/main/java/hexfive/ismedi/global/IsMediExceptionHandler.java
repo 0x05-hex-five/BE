@@ -17,7 +17,7 @@ public class IsMediExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(APIResponse.fail("서버 내부 오류가 발생했습니다."));
+                .body(APIResponse.fail(ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

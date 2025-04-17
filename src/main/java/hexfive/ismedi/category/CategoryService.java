@@ -3,10 +3,8 @@ package hexfive.ismedi.category;
 import hexfive.ismedi.category.dto.CreateCategoryDto;
 import hexfive.ismedi.category.dto.ResCategoryDto;
 import hexfive.ismedi.category.dto.UpdateCategoryDto;
-import hexfive.ismedi.domain.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
