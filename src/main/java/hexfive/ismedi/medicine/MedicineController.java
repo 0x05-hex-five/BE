@@ -22,9 +22,10 @@ public class MedicineController {
     @GetMapping("")
     public APIResponse<List<ResMedicineDto>> getCategory(
             @RequestParam(required = false, defaultValue = "") String name,    // 검색한 의약품명
-            @RequestParam(defaultValue = "ALL") MedicineType type              // 전문/일반 의약품
+            @RequestParam(defaultValue = "ALL") String type              // 전문/일반 의약품
     ) {
-        return APIResponse.success(medicineService.getMedicines(name, type));
+        MedicineType medicineType = MedicineType.from(type);
+        return APIResponse.success(medicineService.getMedicines(name, medicineType));
     }
 
 }
