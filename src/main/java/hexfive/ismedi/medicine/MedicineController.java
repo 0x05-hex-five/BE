@@ -20,7 +20,7 @@ public class MedicineController {
     }
 
     @GetMapping("")
-    public APIResponse<List<ResMedicineDto>> getCategory(
+    public APIResponse<List<ResMedicineDto>> searchMedicines(
             @RequestParam(required = false, defaultValue = "") String name,    // 검색한 의약품명
             @RequestParam(defaultValue = "ALL") String type              // 전문/일반 의약품
     ) {
