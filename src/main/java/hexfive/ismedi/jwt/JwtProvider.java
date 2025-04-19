@@ -165,13 +165,13 @@ public class JwtProvider {
     }
 
     // 로그아웃 시 redis refresh token 삭제하는 메서드
-    public void deleteRefreshToken(String accessToken) {
-        // Access Token이 유효해야 사용자 식별 가능
-        if (!validateAccessToken(accessToken)) {
-            throw new JwtException("유효하지 않은 Access Token입니다.");
+    public Boolean deleteRefreshToken(String refreshToken) {
+        // Refresh Token 유효성 검사
+        if (!validateRefreshToken(refreshToken)) {
+            throw new JwtException("유효하지 않은 Refresh Token입니다.");
         }
 
-        Claims claims = getClaimsFromToken(accessToken, TokenType.ACCESS);
+        Claims claims = getClaimsFromToken(refreshToken, TokenType.REFRESH);
         String userId = claims.getSubject();
 
         String key = "refresh:" + userId;
@@ -179,8 +179,10 @@ public class JwtProvider {
 
         if (Boolean.TRUE.equals(result)) {
             log.info("Redis에서 Refresh Token 삭제 성공: {}", userId);
+            return true;
         } else {
             log.warn("Redis에서 Refresh Token 삭제 실패 or 존재하지 않음: {}", userId);
+            return false;
         }
     }
 
@@ -219,6 +221,8 @@ public class JwtProvider {
 
     // 토큰에서 claim(payload) 추출하는 메서드
     public Claims getClaimsFromToken(String token, TokenType type) {
+        System.out.println("token" + token);
+        System.out.println("type" + type);
         if (type == null) {
             throw new IllegalArgumentException("TokenType은 null일 수 없습니다.");
         }

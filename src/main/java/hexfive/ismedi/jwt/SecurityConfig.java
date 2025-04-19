@@ -1,5 +1,7 @@
 package hexfive.ismedi.jwt;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@SecurityScheme(
+        name = "JWT",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,7 +39,12 @@ public class SecurityConfig {
                 .requestMatchers( // 인증 없이 허용할 URI
                         "/api/auth/**",
                         "/api/interactions/**",
-                        "/api/medicines/**"
+                        "/api/medicines/**",
+                        // Swagger 세팅
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**"
                 ).permitAll()
                 .anyRequest().authenticated() // 나머지는 인증 필요
         ).addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
