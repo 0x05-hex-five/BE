@@ -3,11 +3,23 @@ package hexfive.ismedi.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.domain.User;
+import hexfive.ismedi.exception.DuplicateEmailException;
+import hexfive.ismedi.exception.RedisRuntimeException;
+import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
+import hexfive.ismedi.jwt.TokenType;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
+import hexfive.ismedi.oauth.dto.SignupRequestDto;
+import hexfive.ismedi.oauth.dto.SignupResponseDto;
+import hexfive.ismedi.users.UserRepository;
+import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.Optional;
 
 import static hexfive.ismedi.domain.User.Gender.MAN;
 import static hexfive.ismedi.domain.User.Gender.WOMAN;
@@ -29,6 +43,8 @@ import static hexfive.ismedi.domain.User.Gender.WOMAN;
 @RestController
 public class AuthService {
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -153,5 +169,115 @@ public class AuthService {
             case "male" -> MAN;
             default -> throw new IllegalArgumentException("지원하지 않는 성별 값입니다: " + kakaoGender);
         };
+    }
+
+    // 전달받은 사용자의 데이터를 확인 후 로그인 / 회원가입 분기처리 하는 메서드
+    public KaKaoLoginResultDto loginOrJoin(KakaoUserInfoDto kakaoUserInfoDto){
+        // 이메일로 회원 조회
+        Optional<User> optionalUser = userRepository.findByEmail(kakaoUserInfoDto.getEmail());
+
+        // 기존 회원
+        if (optionalUser.isPresent()) {
+            return KaKaoLoginResultDto.builder()
+                    .isNew(false)
+                    .userInfo(kakaoUserInfoDto)
+                    .build();
+        }
+        // 신규 회원
+        return KaKaoLoginResultDto.builder()
+                .isNew(true)
+                .userInfo(kakaoUserInfoDto)
+                .build();
+    }
+
+    public KaKaoLoginResultDto kakaoLogin(String code) {
+        // 1. 인가코드로 액세스 토큰 요청
+        String kakaoAccessToken = getAccessToken(code);
+
+        // 2. 액세스 토큰으로 사용자 정보 조회
+        KakaoUserInfoDto userInfo = getUserInfoByAccessToken(kakaoAccessToken);
+
+        // 3. 유저 존재 여부 확인 및 처리
+        KaKaoLoginResultDto result = loginOrJoin(userInfo);
+
+        // 4. 신규 유저면 → 추가 정보만 반환
+        if (result.isNew()) {
+            return KaKaoLoginResultDto.builder()
+                    .isNew(true)
+                    .userInfo(result.getUserInfo())
+                    .build();
+        }
+
+        // 5. 기존 유저면 → 토큰 발급 후 함께 반환
+        User user = userRepository.findByEmail(userInfo.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        String accessToken = jwtProvider.generateAccessToken(user.getId());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .userId(user.getId())
+                .build();
+
+        return KaKaoLoginResultDto.builder()
+                .isNew(false)
+                .userInfo(result.getUserInfo())
+                .token(tokenDto)
+                .build();
+    }
+
+
+    public TokenDto reissueAccessToken(String refreshToken) {
+        return jwtProvider.reissueAccessToken(refreshToken);
+    }
+
+    public boolean logout(String refreshToken) {
+        return jwtProvider.deleteRefreshToken(refreshToken);
+    }
+
+    public Map<String, Object> signup(SignupRequestDto request) {
+        // 1. 이메일 중복 체크
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("이미 가입된 이메일입니다.");
+        }
+
+        // 2. User 엔티티 생성 및 저장
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .birth(request.getBirth())
+                .gender(request.getGender())
+                .pregnant(request.isPregnant())
+                .alert(request.isAlert())
+                .build();
+
+        try {
+            User savedUser = userRepository.save(user);
+
+            // 3. JWT 토큰 발급
+            String accessToken = jwtProvider.generateAccessToken(savedUser.getId());
+            String refreshToken = jwtProvider.generateRefreshToken(savedUser.getId());
+
+            // 4. 응답용 DTO 조립
+            TokenDto token = TokenDto.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .userId(savedUser.getId())
+                    .build();
+
+            SignupResponseDto userInfo = SignupResponseDto.builder()
+                    .id(savedUser.getId())
+                    .name(savedUser.getName())
+                    .email(savedUser.getEmail())
+                    .build();
+
+            // 5. 응답용 데이터 Map으로 묶어 반환
+            return Map.of("token", token, "userInfo", userInfo);
+
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateEmailException("이미 가입된 이메일입니다.");
+        }
     }
 }

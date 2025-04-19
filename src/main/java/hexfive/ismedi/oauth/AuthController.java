@@ -1,6 +1,7 @@
 package hexfive.ismedi.oauth;
 
 import hexfive.ismedi.domain.User;
+import hexfive.ismedi.exception.DuplicateEmailException;
 import hexfive.ismedi.global.APIResponse;
 import hexfive.ismedi.global.ErrorCode;
 import hexfive.ismedi.jwt.JwtProvider;
@@ -79,43 +80,23 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "기존 유저 or 신규 유저 구분 응답"),
             @ApiResponse(responseCode = "400", description = "토큰 발급 또는 사용자 정보 조회 실패")
     })
-    @PostMapping("/login/kakao/callback")
-    public ResponseEntity<?> kakaoCallback(@RequestParam String code, HttpServletResponse response){
-        //String accessToken = AuthService.getAccessToken(code); -> 의존성 주입받아서 사용해야 함
-
-        String accessToken = authService.getAccessToken(code);
-        KakaoUserInfoDto userInfo = authService.getUserInfoByAccessToken(accessToken);
-        KaKaoLoginResultDto result = userService.loginOrJoin((userInfo));
-
-        if (result.isNew()) {
-            // 신규 회원 -> 추가 정보 입력 페이지로 이동해야 함
-            return ResponseEntity.ok(APIResponse.success(
-                    KaKaoLoginResultDto.builder()
-                            .isNew(true)
-                            .userInfo(result.getUserInfo())
-                            .build()
-            ));
-        } else {
-            // 기존 회원 -> JWT 토큰 발급
-            User user = userRepository.findByEmail(result.getUserInfo().getEmail())
-                    .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-            String jwtAccessToken = jwtProvider.generateAccessToken(user.getId());
-            String jwtRefreshToken = jwtProvider.generateRefreshToken(user.getId());
-
-            TokenDto tokenDto = TokenDto.builder()
-                    .accessToken(jwtAccessToken)
-                    .refreshToken(jwtRefreshToken)
-                    .userId(user.getId())
-                    .build();
-
-            return ResponseEntity.ok(APIResponse.success(
-                    KaKaoLoginResultDto.builder()
-                            .isNew(false)
-                            .token(tokenDto)
-                            .userInfo(result.getUserInfo())
-                            .build()
-            ));
+    @GetMapping("/login/kakao/callback")
+    public ResponseEntity<?> kakaoCallback(@RequestParam String code){
+        try {
+            KaKaoLoginResultDto result = authService.kakaoLogin(code);
+            return ResponseEntity.ok(APIResponse.success(result));
+        } catch (Exception e) {
+            ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
+            return ResponseEntity.status(errorCode.getStatus())
+                    .body(APIResponse.fail(
+                            Map.of(
+                                    "code", errorCode.getCode(),
+                                    "status", errorCode.getStatus()
+                            ),
+                            e.getMessage()
+                    ));
         }
+
     }
 
     @Operation(
@@ -134,21 +115,31 @@ public class AuthController {
     @Parameter(hidden = true)
     @PostMapping("/reissue")
     public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String header){
-
         if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(APIResponse.fail(Map.of("code", "MISSING_TOKEN", "status", 401), "Refresh Token이 없습니다"));
-        }
-
-        String refreshToken = header.substring(7); // Bearer 제거
-
-        try {
-            TokenDto newToken = jwtProvider.reissueAccessToken(refreshToken);
-            return ResponseEntity.ok(APIResponse.success(newToken));
-        } catch (JwtException e) {
+            ErrorCode errorCode = ErrorCode.MISSING_TOKEN;
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(APIResponse.fail(
-                            Map.of("code", "INVALID_TOKEN", "status", 401),
+                            Map.of(
+                                    "code", errorCode.getCode(),
+                                    "status", errorCode.getStatus()
+                            ),
+                            errorCode.getMessage()
+                    ));
+        }
+
+        String refreshToken = header.substring(7);
+
+        try {
+            TokenDto newToken = authService.reissueAccessToken(refreshToken);
+            return ResponseEntity.ok(APIResponse.success(newToken));
+        } catch (JwtException e) {
+            ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(APIResponse.fail(
+                            Map.of(
+                                "code", errorCode.getCode(),
+                                "status", errorCode.getStatus()
+                            ),
                             e.getMessage()
                     ));
         }
@@ -176,8 +167,7 @@ public class AuthController {
         }
 
         String token = header.substring(7);
-        System.out.println(token);
-        Boolean logoutSuccess = jwtProvider.deleteRefreshToken(token);
+        boolean logoutSuccess = authService.logout(token);
 
         if(!logoutSuccess){
             ErrorCode errorCode = ErrorCode.LOGOUT_FAILED;
@@ -209,58 +199,29 @@ public class AuthController {
     public ResponseEntity<?> signup(@RequestBody @Valid SignupRequestDto request, BindingResult bindingResult){
         // @Valid 결과
         if(bindingResult.hasErrors()){
-            String errorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage(); // 자바 21 이상에서는 getFirst() 쓰면 된대
-            return ResponseEntity.badRequest().body(APIResponse.fail(null, errorMessage));
-        }
-
-        // 중복 이메일 확인
-        if(userRepository.existsByEmail(request.getEmail())){
+            ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
+            String message = bindingResult.getAllErrors().get(0).getDefaultMessage();
             return ResponseEntity.badRequest().body(APIResponse.fail(
-                    null,
-                    "이미 가입된 이메일입니다."
+                    Map.of(
+                        "code", errorCode.getCode(),
+                        "status", errorCode.getStatus()
+                    ),
+                    message
             ));
         }
-        
-        // 회원가입 및 토큰 발급
+
         try {
-            // User 엔티티 생성
-            User user = User.builder()
-                    .name(request.getName())
-                    .email(request.getEmail())
-                    .birth(request.getBirth())
-                    .gender(request.getGender())
-                    .pregnant(request.isPregnant())
-                    .alert(request.isAlert())
-                    .build();
-            
-            User savedUser = userRepository.save(user);
-
-            // 토큰 발급
-            String accessToken = jwtProvider.generateAccessToken(savedUser.getId());
-            String refreshToken = jwtProvider.generateRefreshToken(savedUser.getId());
-
-            // 토큰 DTO
-            TokenDto tokenDto = TokenDto.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .userId(savedUser.getId())
-                    .build();
-
-            // 응답 DTO
-            SignupResponseDto userInfo = SignupResponseDto.builder()
-                    .id(savedUser.getId())
-                    .name(savedUser.getName())
-                    .email(savedUser.getEmail())
-                    .build();
-
-            return ResponseEntity.ok(APIResponse.success(
+            Map<String, Object> result = authService.signup(request);
+            return ResponseEntity.ok(APIResponse.success(result));
+        } catch (DuplicateEmailException e) {
+            ErrorCode errorCode = ErrorCode.DUPLICATE_EMAIL;
+            return ResponseEntity.badRequest().body(APIResponse.fail(
                     Map.of(
-                            "token", tokenDto,
-                            "userInfo", userInfo
-                    )
+                            "code", errorCode.getCode(),
+                            "status", errorCode.getStatus()
+                    ),
+                    errorCode.getMessage()
             ));
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(APIResponse.fail(null, "이미 가입된 이메일입니다."));
         }
     }
 }
