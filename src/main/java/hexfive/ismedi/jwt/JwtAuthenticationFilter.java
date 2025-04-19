@@ -37,6 +37,11 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        if (httpRequest.getRequestURI().equals("/api/auth/reissue")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String token = resolveToken(httpRequest); // 헤더에서 토큰 추출
 
         if (token != null) { // 존재하면 유효성 검사

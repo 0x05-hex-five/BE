@@ -4,21 +4,24 @@ import hexfive.ismedi.domain.User;
 import hexfive.ismedi.global.APIResponse;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
+import hexfive.ismedi.jwt.TokenType;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
 import hexfive.ismedi.users.UserRepository;
 import hexfive.ismedi.users.UserService;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class AuthController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @GetMapping("/test")
     public ResponseEntity<String> testToken() { return ResponseEntity.status(HttpStatus.OK).body("test ok"); }
@@ -92,6 +96,42 @@ public class AuthController {
                             .build()
             ));
         }
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String header){
+
+        if (header == null || !header.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(APIResponse.fail(Map.of("code", "MISSING_TOKEN", "status", 401), "Refresh Token이 없습니다"));
+        }
+
+        String refreshToken = header.substring(7); // Bearer 제거
+
+        try {
+            TokenDto newToken = jwtProvider.reissueAccessToken(refreshToken);
+            return ResponseEntity.ok(APIResponse.success(newToken));
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(APIResponse.fail(
+                            Map.of("code", "INVALID_TOKEN", "status", 401),
+                            e.getMessage()
+                    ));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String header) {
+        if (header == null || !header.startsWith("Bearer ")) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(APIResponse.fail("Access Token이 없습니다."));
+        }
+
+        String token = header.substring(7);
+        jwtProvider.deleteRefreshToken(token);
+        return ResponseEntity.ok(APIResponse.success(
+                "로그아웃 되었습니다."
+        ));
     }
 
 }
