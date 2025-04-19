@@ -15,6 +15,9 @@ public enum ErrorCode {
     MISSING_TOKEN("MISSING_TOKEN", "Access Token이 없습니다", HttpStatus.UNAUTHORIZED),
     LOGOUT_FAILED("LOGOUT_FAILED", "로그아웃 처리 중 문제가 발생했습니다. 토큰이 이미 만료되었거나 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
+    // Redis 관련
+    REDIS_ERROR("REDIS_ERROR", "토큰 저장소(Redis) 처리 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+
 
     // 요청 오류 관련
     VALIDATION_FAILED("VALIDATION_FAILED", "요청값이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
