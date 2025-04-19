@@ -47,9 +47,6 @@ public class AuthController {
     private final RedisTemplate<String, String> redisTemplate;
     private final View error;
 
-    @GetMapping("/test")
-    public ResponseEntity<String> testToken() { return ResponseEntity.status(HttpStatus.OK).body("test ok"); }
-
     @Value("${kakao.client-id}")
     private String clientId;
 
