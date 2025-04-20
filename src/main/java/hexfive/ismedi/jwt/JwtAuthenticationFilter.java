@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
@@ -28,12 +30,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtProvider jwtProvider;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // doFilter() : GenericFilterBean을 상속받아 필터로 작동
-        // 모든 요청마다 doFilter() 메서드가 실행됨
-        // 미들웨어같은 역할이랄까?
-
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
@@ -42,7 +40,25 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             return;
         }
 
-        String token = resolveToken(httpRequest); // 헤더에서 토큰 추출
+        String token = resolveToken(httpRequest);
+        if (token != null && jwtProvider.isBlacklisted(token)) {
+            ErrorCode errorCode = ErrorCode.LOGOUT_TOKEN;
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("code", errorCode.getCode());
+            error.put("status", errorCode.getStatusCode());
+
+            httpResponse.setStatus(errorCode.getStatusCode());
+            httpResponse.setContentType("application/json;charset=UTF-8");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(
+                    APIResponse.fail(error, errorCode.getMessage())
+            );
+
+            httpResponse.getWriter().write(json);
+            return;
+        }
 
         if (token != null) { // 존재하면 유효성 검사
             try{
@@ -97,12 +113,11 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         chain.doFilter(request, response);
     }
-    
-    // 헤더에서 토큰 추출하는 메서드
+
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // "Bearer " 이후의 값
+            return bearerToken.substring(7);
         }
         return null;
     }

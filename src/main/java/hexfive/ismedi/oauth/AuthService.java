@@ -4,22 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.domain.User;
 import hexfive.ismedi.exception.DuplicateEmailException;
-import hexfive.ismedi.exception.RedisRuntimeException;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
-import hexfive.ismedi.jwt.TokenType;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.oauth.dto.SignupResponseDto;
 import hexfive.ismedi.users.UserRepository;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -55,9 +50,42 @@ public class AuthService {
     @Value("${kakao.client-secret}")
     private String clientSecret;
 
+    public KaKaoLoginResultDto kakaoLogin(String code) {
+        String kakaoAccessToken = getAccessToken(code);
+
+        KakaoUserInfoDto userInfo = getUserInfoByAccessToken(kakaoAccessToken);
+
+        KaKaoLoginResultDto result = loginOrJoin(userInfo);
+
+        // 신규 회원
+        if (result.isNew()) {
+            return KaKaoLoginResultDto.builder()
+                    .isNew(true)
+                    .userInfo(result.getUserInfo())
+                    .build();
+        }
+        // 기존 회원
+        User user = userRepository.findByEmail(userInfo.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        String accessToken = jwtProvider.generateAccessToken(user.getId());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .userId(user.getId())
+                .build();
+
+        return KaKaoLoginResultDto.builder()
+                .isNew(false)
+                .userInfo(result.getUserInfo())
+                .token(tokenDto)
+                .build();
+    }
+
     // Controller에서 넘겨받은 code값으로 카카오 서버에 토큰 요청하는 메서드
     public String getAccessToken(String code){
-
         RestTemplate restTemplate = new RestTemplate(); // 스프링 내장 클래스 for REST API
 
         // 헤더 설정
@@ -96,23 +124,10 @@ public class AuthService {
     public KakaoUserInfoDto getUserInfoByAccessToken(String accessToken){
         // 헤더 설정
         HttpHeaders httpHeaders = new HttpHeaders();
-
-        /*
-        * Authorization : "Authorization"이라는 이름의 HTTP 헤더를 추가
-        * Bearer : OAuth 2.0에서 access token을 쓸 때 사용하는 토큰 타입
-        * */
         httpHeaders.set("Authorization", "Bearer " + accessToken);
-
-        /*
-        * Content-Type: application/x-www-form-urlencoded
-        * POST 요청 시, body가 키=값&키=값 형식으로 전송된다는 뜻
-        * 이런 헤더 정보는 카카오 로그인 API 명세에 나와있음
-        * */
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
         // 요청 객체 생성
         HttpEntity<?> request = new HttpEntity<>(httpHeaders);
-
         // 요청 전송
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.postForEntity(
@@ -120,22 +135,6 @@ public class AuthService {
                 request,
                 String.class
         );
-        /*
-            /v2/user/me 응답 format
-            {
-                "id": 123456789,
-                "kakao_account": {
-                    "email": "user@example.com",
-                    "profile": {
-                        "nickname": "홍길동"
-                    },
-                    "name": "홍길동",
-                    "gender": "male",
-                    "birthday": "0720",
-                    "phone_number": "+82 10-1234-5678"
-                }
-            }
-        */
 
         // json 파싱
         try{
@@ -190,51 +189,13 @@ public class AuthService {
                 .build();
     }
 
-    public KaKaoLoginResultDto kakaoLogin(String code) {
-        // 1. 인가코드로 액세스 토큰 요청
-        String kakaoAccessToken = getAccessToken(code);
-
-        // 2. 액세스 토큰으로 사용자 정보 조회
-        KakaoUserInfoDto userInfo = getUserInfoByAccessToken(kakaoAccessToken);
-
-        // 3. 유저 존재 여부 확인 및 처리
-        KaKaoLoginResultDto result = loginOrJoin(userInfo);
-
-        // 4. 신규 유저면 → 추가 정보만 반환
-        if (result.isNew()) {
-            return KaKaoLoginResultDto.builder()
-                    .isNew(true)
-                    .userInfo(result.getUserInfo())
-                    .build();
-        }
-
-        // 5. 기존 유저면 → 토큰 발급 후 함께 반환
-        User user = userRepository.findByEmail(userInfo.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-
-        String accessToken = jwtProvider.generateAccessToken(user.getId());
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
-
-        TokenDto tokenDto = TokenDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .userId(user.getId())
-                .build();
-
-        return KaKaoLoginResultDto.builder()
-                .isNew(false)
-                .userInfo(result.getUserInfo())
-                .token(tokenDto)
-                .build();
-    }
-
-
     public TokenDto reissueAccessToken(String refreshToken) {
         return jwtProvider.reissueAccessToken(refreshToken);
     }
 
-    public boolean logout(String refreshToken) {
-        return jwtProvider.deleteRefreshToken(refreshToken);
+    public boolean logout(String AccessToken) {
+        jwtProvider.addToBlacklist(AccessToken);
+        return jwtProvider.deleteRefreshToken(AccessToken);
     }
 
     public Map<String, Object> signup(SignupRequestDto request) {

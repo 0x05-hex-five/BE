@@ -1,14 +1,11 @@
 package hexfive.ismedi.oauth;
 
-import hexfive.ismedi.domain.User;
 import hexfive.ismedi.exception.DuplicateEmailException;
 import hexfive.ismedi.global.APIResponse;
 import hexfive.ismedi.global.ErrorCode;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
-import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.oauth.dto.SignupResponseDto;
 import hexfive.ismedi.users.UserRepository;
 import hexfive.ismedi.users.UserService;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
@@ -18,12 +15,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +34,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    private final AuthService authService;  // 의존성 주입 받기
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private final JwtProvider jwtProvider;
-    private final RedisTemplate<String, String> redisTemplate;
-    private final View error;
+    private final AuthService authService;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -145,8 +134,8 @@ public class AuthController {
     @Operation(
             summary = "로그아웃",
             description = """
-                Redis에 저장된 Refresh Token을 삭제합니다.
-                이 API는 Refresh Token이 필요합니다.
+                Access Token을 열어보고, 해당 회원의 userId를 조회해 Redis에 저장된 Refresh Token을 삭제합니다.
+                이 API는 Access Token이 필요합니다.
             """,
             security = @SecurityRequirement(name = "JWT")
     )

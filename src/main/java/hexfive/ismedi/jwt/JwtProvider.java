@@ -30,16 +30,12 @@ public class JwtProvider {
     private String accessSecretKeyString;
     @Value("${jwt.refresh-secret}")
     private String refreshSecretKeyString;
-    //private final StringRedisTemplate redisTemplate;
-
     @Getter
     private Key accessSecretKey;
     @Getter
     private Key refreshSecretKey;
-
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 60;               // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 14;    // 2주
-
     private final RedisTemplate<String, String> redisTemplate;
 
     @PostConstruct
@@ -48,24 +44,19 @@ public class JwtProvider {
         this.refreshSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecretKeyString));
     }
 
-
-    // Access 토큰 생성하는 메서드
     public String generateAccessToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
 
-        String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("type", "access")
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(accessSecretKey, SignatureAlgorithm.HS256)
                 .compact();
-
-        return accessToken;
     }
 
-    // Refresh 토큰을 생성하는 메서드
     public String generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME); // 7일
@@ -78,14 +69,11 @@ public class JwtProvider {
                 .signWith(refreshSecretKey, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Redis에 저장 (key: RT:<email>, value: refreshToken)
-        String key = "refresh:" + userId;
-        redisTemplate.opsForValue().set(key, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("refresh:" + userId, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
 
         return refreshToken;
     }
 
-    // Access 토큰의 유효성 검증하는 메서드
     public boolean validateAccessToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
@@ -95,16 +83,10 @@ public class JwtProvider {
                     .getBody();
 
             String type = claims.get("type", String.class);
-            if (!"access".equals(type)) {
-                log.warn("Access Token이 아님!");
-                return false;
-            }
-            return true;
+            return "access".equals(type);
         } catch (ExpiredJwtException e) {
-            log.info("Access Token 만료: {}", e.getMessage());
             throw e;
         } catch (JwtException | IllegalArgumentException e) {
-            log.info("유효하지 않은 Access Token: {}", e.getMessage());
             throw new JwtException("Invalid JWT token", e);
         }
     }
@@ -119,11 +101,7 @@ public class JwtProvider {
                     .getBody();
 
             String type = claims.get("type", String.class);
-            if (!"refresh".equals(type)) {
-                log.warn("Refesh Token이 아님!");
-                return false;
-            }
-            return true;
+            return "refresh".equals(type);
         } catch (ExpiredJwtException e) {
             log.info("Refesh Token 만료: {}", e.getMessage());
             throw e;
@@ -135,107 +113,77 @@ public class JwtProvider {
 
     // Refresh 토큰 재발급하는 메서드
     public TokenDto reissueAccessToken(String refreshToken) {
-        // 1. 유효성 검사
-        if (!validateRefreshToken(refreshToken)) {
-            throw new JwtException("유효하지 않은 Refresh Token입니다.");
-        }
 
-        // 2. claims에서 userId 추출
         Claims claims = getClaimsFromToken(refreshToken, TokenType.REFRESH);
         String userId = claims.getSubject();
-        String redisKey = "refresh:" + userId;
 
-        // 3. Redis에 저장된 refresh 토큰과 비교
-        String storedToken = redisTemplate.opsForValue().get(redisKey);
+        String storedToken = redisTemplate.opsForValue().get("refresh:" + userId);
         if (storedToken == null || !storedToken.equals(refreshToken)) {
             throw new JwtException("저장된 Refresh Token과 일치하지 않습니다.");
         }
 
-        // 4. Access Token 재발급
         String newAccessToken = generateAccessToken(Long.valueOf(userId));
         String newRefreshToken = generateRefreshToken(Long.valueOf(userId));
 
-        TokenDto tokenDto = TokenDto.builder()
+        return TokenDto.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .userId(Long.valueOf(userId))
                 .build();
-
-        return tokenDto;
     }
 
     // 로그아웃 시 redis refresh token 삭제하는 메서드
-    public Boolean deleteRefreshToken(String refreshToken) {
-        // Refresh Token 유효성 검사
-        if (!validateRefreshToken(refreshToken)) {
-            throw new JwtException("유효하지 않은 Refresh Token입니다.");
-        }
-
-        Claims claims = getClaimsFromToken(refreshToken, TokenType.REFRESH);
-        String userId = claims.getSubject();
-
-        String key = "refresh:" + userId;
-        Boolean result = redisTemplate.delete(key);
-
-        if (Boolean.TRUE.equals(result)) {
-            log.info("Redis에서 Refresh Token 삭제 성공: {}", userId);
-            return true;
-        } else {
-            log.warn("Redis에서 Refresh Token 삭제 실패 or 존재하지 않음: {}", userId);
-            return false;
-        }
+    public Boolean deleteRefreshToken(String AccessToken) {
+        Boolean result = redisTemplate.delete(
+                "refresh:" + getClaimsFromToken(AccessToken, TokenType.ACCESS).getSubject()
+        );
+        return Boolean.TRUE.equals(result);
     }
 
     // 삭제된 refresh 토큰 블랙리스트 Redis 추가하는 메서드
+    public void addToBlacklist(String token) {
+        redisTemplate.opsForValue()
+                .set("blacklist:" + token, "logout", getExpiration(token), TimeUnit.MILLISECONDS);
+    }
+
+    // 필터에서 토큰 블랙리스트 확인
+    public boolean isBlacklisted(String token) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
+    }
+
+    // 토큰의 남은 만료 시간 구하기
+    public long getExpiration(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(accessSecretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Date expiration = claims.getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 
 
     // 토큰에서 subject 추출 후 인증 객체 생성하는 메서드
     public Authentication getAuthentication(String token) {
-        // JwtAuthenticationFilter.doFilter() 에서 토큰이 유효할 경우 호출됨
-        // "이 사용자는 인증되었다" 판단할 수 있도록 Authentication 객체를 만들어서 Spring Security에 넘겨줌
-
-        if (!validateAccessToken(token)) {
-            log.info("JWT 토큰 유효성 검증 실패");
-            throw new RuntimeException("유효하지 않은 JWT 토큰입니다.");
-        }
-
-        Claims claims = getClaimsFromToken(token, TokenType.ACCESS);
-        if (claims == null) {
-            log.info("JWT 클레임이 null입니다.");
-            throw new RuntimeException("JWT 클레임을 추출할 수 없습니다.");
-        }
-
-        String subject = claims.getSubject();
-
         // UserDetails 객체 생성 : Spring Security에서 사용자의 정보를 담는 인터페이스 객체
         UserDetails userDetails = new User(
-                subject,
+                getClaimsFromToken(token, TokenType.ACCESS).getSubject(),
                 "",
                 Collections.emptyList()
         );
-
-        // UsernamePasswordAuthenticationToken : Authentication 인터페이스를 구현한 클래스
-        // Spring Security는 이걸 사용해서 "인증 완료된 사용자 정보" 를 담아 보관
         return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
-    // 토큰에서 claim(payload) 추출하는 메서드
+    // 토큰에서 claim 추출하는 메서드
     public Claims getClaimsFromToken(String token, TokenType type) {
-        System.out.println("token" + token);
-        System.out.println("type" + type);
-        if (type == null) {
-            throw new IllegalArgumentException("TokenType은 null일 수 없습니다.");
-        }
-        Key key = type.resolveKey(this);
-
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(type.resolveKey(this))
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException e) {
-            log.info("토큰에서 payload 추출 실패: " + e.getMessage());
             throw new RuntimeException("토큰에서 payload 추출 실패: " + e.getMessage());
         }
     }
