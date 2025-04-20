@@ -20,6 +20,15 @@ public class APIResponse<T> {
                 .build();
     }
 
+    public static <T> APIResponse<T> fail(String message) {
+        return APIResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .error(null)
+                .data(null)
+                .build();
+    }
+
     public static <T> APIResponse<T> fail(T error, String message) {
         return APIResponse.<T>builder()
                 .success(false)
