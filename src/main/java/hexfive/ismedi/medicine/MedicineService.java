@@ -1,5 +1,6 @@
 package hexfive.ismedi.medicine;
 
+import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
@@ -68,5 +69,11 @@ public class MedicineService {
         return medicines.stream()
                 .map(ResMedicineDto::fromEntity)
                 .toList();
+    }
+
+    public ResMedicineDetailDto getMedicine(Long id) {
+        Medicine medicine = medicineRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 약 id 입니다."));
+        return ResMedicineDetailDto.fromEntity(medicine);
     }
 }

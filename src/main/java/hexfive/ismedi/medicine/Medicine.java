@@ -15,30 +15,30 @@ public class Medicine {
     private Long id;
 
     // DrugInfo
-    private String entpName;
+    private String entpName; // 업체명
     @Column(length = 1000)
-    private String itemName;
+    private String itemName; // 제품명
     @Column(unique = true)
-    private String itemSeq;
+    private String itemSeq; // 품목기준코드
     @Column(length = 2000)
-    private String efcyQesitm;
+    private String efcyQesitm; // 효능
     @Column(length = 2000)
-    private String useMethodQesitm;
+    private String useMethodQesitm; // 사용법
     @Column(length = 2000)
-    private String atpnQesitm;
+    private String atpnQesitm; // 주의사항
     @Column(length = 2000)
-    private String intrcQesitm;
+    private String intrcQesitm; // 상호작용
     @Column(length = 2000)
-    private String seQesitm;
+    private String seQesitm; // 부작용
     @Column(length = 2000)
-    private String depositMethodQesitm;
-    private String itemImage;
+    private String depositMethodQesitm; // 보관법
+    private String itemImage; // 낱알이미지
 
     // PrescriptionType
-    private String etcOtcCodeName;
-    private String classNoName;
+    private String etcOtcCodeName; // 의약품 분류(전문/일반)
+    private String classNoName; // 약 정보
 
-    //    @ManyToOne
-    //    @JoinColumn(name = "category_id", nullable = true)
-    //    private Category category;
+    // @ManyToOne
+    // @JoinColumn(name = "category_id", nullable = true)
+    // private Category category;
 }

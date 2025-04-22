@@ -1,6 +1,7 @@
 package hexfive.ismedi.medicine;
 
 import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -28,4 +29,8 @@ public class MedicineController {
         return APIResponse.success(medicineService.getMedicines(name, medicineType));
     }
 
+    @GetMapping("/{id}")
+    public APIResponse<ResMedicineDetailDto> searchMedicines(@PathVariable Long id){
+        return APIResponse.success(medicineService.getMedicine(id));
+    }
 }
