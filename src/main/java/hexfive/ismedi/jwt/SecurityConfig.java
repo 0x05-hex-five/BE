@@ -40,6 +40,7 @@ public class SecurityConfig {
                         "/api/auth/**",
                         "/api/interactions/**",
                         "/api/medicines/**",
+                        "/api/fetch/**",
                         // Swagger 세팅
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
