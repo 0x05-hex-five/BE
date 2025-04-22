@@ -1,5 +1,7 @@
-package hexfive.ismedi.jwt;
+package hexfive.ismedi.config;
 
+import hexfive.ismedi.jwt.JwtAuthenticationFilter;
+import hexfive.ismedi.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
