@@ -2,11 +2,11 @@ package hexfive.ismedi.openApi;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexfive.ismedi.global.CustomException;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
-import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static hexfive.ismedi.global.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -53,9 +55,7 @@ public class OpenAPIService {
         log.info("저장 완료 - 총 저장: {}, 총 스킵: {}", totalSaved, totalSkipped);
 
         if (totalSaved + totalSkipped != totalCount) {
-            throw new IllegalStateException(String.format(
-                    "처리된 건수 불일치: 저장 %d + 스킵 %d ≠ 전체 %d", totalSaved, totalSkipped, totalCount
-            ));
+            throw new CustomException(MISMATCH_COUNT, totalSaved, totalSkipped, totalCount);
         }
     }
 

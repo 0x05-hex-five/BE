@@ -1,9 +1,12 @@
 package hexfive.ismedi.openApi;
 
+import hexfive.ismedi.global.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static hexfive.ismedi.global.ErrorCode.INVALID_API_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +26,7 @@ public class OpenAPIController {
         switch (apiType) {
             case DRUG_INFO -> openAPIService.fetchDrugInfoPage(apiType, pageNo);
             case PRESCRIPTION_TYPE -> openAPIService.fetchPrescriptionTypePage(apiType, pageNo);
-            default -> throw new IllegalArgumentException("지원하지 않는 API 타입입니다: " + apiType);
+            default -> throw new CustomException(INVALID_API_TYPE, type);
         }
     }
 }
