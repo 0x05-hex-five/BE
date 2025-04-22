@@ -1,5 +1,6 @@
-package hexfive.ismedi.global;
+package hexfive.ismedi.global.exception;
 
+import hexfive.ismedi.global.response.APIResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

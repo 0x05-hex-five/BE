@@ -1,8 +1,7 @@
 package hexfive.ismedi.oauth;
 
-import hexfive.ismedi.global.APIResponse;
-import hexfive.ismedi.global.CustomException;
-import hexfive.ismedi.global.ErrorCode;
+import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
@@ -16,14 +15,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
 
-import static hexfive.ismedi.global.ErrorCode.*;
+import static hexfive.ismedi.global.exception.ErrorCode.*;
 
 @Slf4j
 @RequiredArgsConstructor
