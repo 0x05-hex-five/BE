@@ -2,15 +2,11 @@ package hexfive.ismedi.oauth;
 
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.exception.CustomException;
+import hexfive.ismedi.global.swagger.AuthControllerDocs;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +22,7 @@ import static hexfive.ismedi.global.exception.ErrorCode.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
     private final AuthService authService;
 
     @Value("${kakao.client-id}")
@@ -35,10 +31,6 @@ public class AuthController {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
 
-    @Operation(
-            summary = "카카오 로그인 요청",
-            description = "카카오 인증 서버로 리다이렉트합니다."
-    )
     @GetMapping("/login")
     public RedirectView kakaoLogin() {
         String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize"
@@ -49,36 +41,12 @@ public class AuthController {
         return new RedirectView(kakaoAuthUrl);
     }
 
-    @Operation(
-            summary = "카카오 로그인 콜백",
-            description = """
-                카카오에서 리다이렉트된 인가 코드를 처리하여 사용자 정보를 조회합니다.
-            """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "기존 유저 or 신규 유저 구분 응답"),
-            @ApiResponse(responseCode = "400", description = "토큰 발급 또는 사용자 정보 조회 실패")
-    })
     @GetMapping("/login/kakao/callback")
     public APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code){
         KaKaoLoginResultDto result = authService.kakaoLogin(code);
         return APIResponse.success(result);
     }
 
-    @Operation(
-            summary = "Access Token 재발급",
-            description = """
-                Refresh Token을 검증한 후 Access Token을 재발급합니다.
-                이 API는 Refresh Token이 필요합니다.
-            """,
-            security = @SecurityRequirement(name = "JWT")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
-            @ApiResponse(responseCode = "401", description = "[INVALID_TOKEN] 유효하지 않은 토큰입니다."),
-            @ApiResponse(responseCode = "401", description = "[TOKEN_EXPIRED] 토큰이 만료되었습니다.")
-    })
-    @Parameter(hidden = true)
     @PostMapping("/reissue")
     public APIResponse<TokenDto> reissueToken(@RequestHeader("Authorization") String header){
         if (header == null || !header.startsWith("Bearer ")) {
@@ -94,14 +62,6 @@ public class AuthController {
         }
     }
 
-    @Operation(
-            summary = "로그아웃",
-            description = """
-                Access Token을 열어보고, 해당 회원의 userId를 조회해 Redis에 저장된 Refresh Token을 삭제합니다.
-                이 API는 Access Token이 필요합니다.
-            """,
-            security = @SecurityRequirement(name = "JWT")
-    )
     @PostMapping("/logout")
     public APIResponse<String> logout(@RequestHeader("Authorization") String header) {
         if (header == null || !header.startsWith("Bearer ")) {
@@ -117,17 +77,6 @@ public class AuthController {
         return APIResponse.success("로그아웃 되었습니다.");
     }
 
-    @Operation(
-            summary = "회원가입",
-            description = """
-                카카오 사용자 정보 및 추가 정보를 통해 사용자 정보를 등록합니다.
-                회원가입 후 Access Token과 Refresh Token이 함께 발급되어 로그인 상태로 전환됩니다.
-            """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원가입 성공 및 토큰 발급"),
-            @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 또는 중복 이메일")
-    })
     @PostMapping("/signup")
     public APIResponse<?> signup(@RequestBody @Valid SignupRequestDto request){
         Map<String, Object> result = authService.signup(request);
