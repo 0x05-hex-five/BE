@@ -63,9 +63,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "토큰 발급 또는 사용자 정보 조회 실패")
     })
     @GetMapping("/login/kakao/callback")
-    public ResponseEntity<?> kakaoCallback(@RequestParam String code){
+    public APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code){
         KaKaoLoginResultDto result = authService.kakaoLogin(code);
-        return ResponseEntity.ok(APIResponse.success(result));
+        return APIResponse.success(result);
     }
 
     @Operation(
@@ -83,7 +83,7 @@ public class AuthController {
     })
     @Parameter(hidden = true)
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String header){
+    public APIResponse<TokenDto> reissueToken(@RequestHeader("Authorization") String header){
         if (header == null || !header.startsWith("Bearer ")) {
             throw new CustomException(MISSING_TOKEN);
         }
@@ -91,7 +91,7 @@ public class AuthController {
         String refreshToken = header.substring(7);
         try {
             TokenDto newToken = authService.reissueAccessToken(refreshToken);
-            return ResponseEntity.ok(APIResponse.success(newToken));
+            return APIResponse.success(newToken);
         } catch (JwtException e) {
             throw new CustomException(INVALID_TOKEN);
         }
@@ -106,7 +106,7 @@ public class AuthController {
             security = @SecurityRequirement(name = "JWT")
     )
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String header) {
+    public APIResponse<String> logout(@RequestHeader("Authorization") String header) {
         if (header == null || !header.startsWith("Bearer ")) {
             throw new CustomException(MISSING_TOKEN);
         }
@@ -117,9 +117,7 @@ public class AuthController {
         if(!logoutSuccess){
             throw new CustomException(LOGOUT_FAILED);
         }
-        return ResponseEntity.ok(APIResponse.success(
-                "로그아웃 되었습니다."
-        ));
+        return APIResponse.success("로그아웃 되었습니다.");
     }
 
     @Operation(
@@ -134,17 +132,8 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 또는 중복 이메일")
     })
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid SignupRequestDto request){
+    public APIResponse<?> signup(@RequestBody @Valid SignupRequestDto request){
         Map<String, Object> result = authService.signup(request);
-        return ResponseEntity.ok(APIResponse.success(result));
+        return APIResponse.success(result);
     }
 }
-
-
-
-
-
-
-
-
-
