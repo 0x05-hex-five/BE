@@ -1,13 +1,9 @@
 package hexfive.ismedi.oauth;
 
-import hexfive.ismedi.exception.DuplicateEmailException;
 import hexfive.ismedi.global.APIResponse;
 import hexfive.ismedi.global.ErrorCode;
-import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.users.UserRepository;
-import hexfive.ismedi.users.UserService;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,12 +15,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
@@ -182,33 +175,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 또는 중복 이메일")
     })
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid SignupRequestDto request, BindingResult bindingResult){
-        // @Valid 결과
-        if(bindingResult.hasErrors()){
-            ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
-            String message = bindingResult.getAllErrors().get(0).getDefaultMessage();
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                        "code", errorCode.getCode(),
-                        "status", errorCode.getStatus()
-                    ),
-                    message
-            ));
-        }
-
-        try {
-            Map<String, Object> result = authService.signup(request);
-            return ResponseEntity.ok(APIResponse.success(result));
-        } catch (DuplicateEmailException e) {
-            ErrorCode errorCode = ErrorCode.DUPLICATE_EMAIL;
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
-        }
+    public ResponseEntity<?> signup(@RequestBody @Valid SignupRequestDto request){
+        Map<String, Object> result = authService.signup(request);
+        return ResponseEntity.ok(APIResponse.success(result));
     }
 }
 
