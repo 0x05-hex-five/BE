@@ -1,6 +1,7 @@
 package hexfive.ismedi.oauth;
 
 import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.global.CustomException;
 import hexfive.ismedi.global.ErrorCode;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
+
+import static hexfive.ismedi.global.ErrorCode.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,21 +64,8 @@ public class AuthController {
     })
     @GetMapping("/login/kakao/callback")
     public ResponseEntity<?> kakaoCallback(@RequestParam String code){
-        try {
-            KaKaoLoginResultDto result = authService.kakaoLogin(code);
-            return ResponseEntity.ok(APIResponse.success(result));
-        } catch (Exception e) {
-            ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
-            return ResponseEntity.status(errorCode.getStatus())
-                    .body(APIResponse.fail(
-                            Map.of(
-                                    "code", errorCode.getCode(),
-                                    "status", errorCode.getStatus()
-                            ),
-                            e.getMessage()
-                    ));
-        }
-
+        KaKaoLoginResultDto result = authService.kakaoLogin(code);
+        return ResponseEntity.ok(APIResponse.success(result));
     }
 
     @Operation(
@@ -95,32 +85,15 @@ public class AuthController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String header){
         if (header == null || !header.startsWith("Bearer ")) {
-            ErrorCode errorCode = ErrorCode.MISSING_TOKEN;
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(APIResponse.fail(
-                            Map.of(
-                                    "code", errorCode.getCode(),
-                                    "status", errorCode.getStatus()
-                            ),
-                            errorCode.getMessage()
-                    ));
+            throw new CustomException(MISSING_TOKEN);
         }
 
         String refreshToken = header.substring(7);
-
         try {
             TokenDto newToken = authService.reissueAccessToken(refreshToken);
             return ResponseEntity.ok(APIResponse.success(newToken));
         } catch (JwtException e) {
-            ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(APIResponse.fail(
-                            Map.of(
-                                "code", errorCode.getCode(),
-                                "status", errorCode.getStatus()
-                            ),
-                            e.getMessage()
-                    ));
+            throw new CustomException(INVALID_TOKEN);
         }
     }
 
@@ -135,28 +108,14 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String header) {
         if (header == null || !header.startsWith("Bearer ")) {
-            ErrorCode errorCode = ErrorCode.MISSING_TOKEN;
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
+            throw new CustomException(MISSING_TOKEN);
         }
 
         String token = header.substring(7);
         boolean logoutSuccess = authService.logout(token);
 
         if(!logoutSuccess){
-            ErrorCode errorCode = ErrorCode.LOGOUT_FAILED;
-            return ResponseEntity.ok(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
+            throw new CustomException(LOGOUT_FAILED);
         }
         return ResponseEntity.ok(APIResponse.success(
                 "로그아웃 되었습니다."
