@@ -1,5 +1,6 @@
 package hexfive.ismedi.domain;
 
+import hexfive.ismedi.medicine.Medicine;
 import jakarta.persistence.*;
 
 @Entity

@@ -1,0 +1,55 @@
+name: ismedi CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: 빌드 및 배포
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v2
+
+      - name: JDK 설정
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+
+      - name: Gradle 실행 권한 부여
+        run: chmod +x gradlew
+
+      - name: Gradle 빌드 (테스트 제외)
+        run: ./gradlew clean build -x test
+
+      - name: DockerHub 로그인
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ismedi-be .
+          docker push ${{ secrets.DOCKER_USERNAME }}/ismedi-be
+
+      - name: deploy.sh 업로드
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: scripts/deploy.sh
+          target: ~/ismedi/
+
+      - name: 배포 스크립트 실행
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            chmod +x ~/ismedi/scripts/deploy.sh
+            export DB_ROOT_PASSWORD="${{ secrets.DB_ROOT_PASSWORD }}"
+            export DB_USER_PASSWORD="${{ secrets.DB_USER_PASSWORD }}"
+            ~/ismedi/scripts/deploy.sh
