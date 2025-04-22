@@ -11,6 +11,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class IsMediExceptionHandler {
 
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<APIResponse<Void>> handleGeneralException(CustomException ex) {
+        log.error("Exception occurred: {}, Type: {}", ex.getMessage(), ex.getClass().getSimpleName());
+
+        return ResponseEntity
+                .status(ex.getErrorCode().getStatus())
+                .body(APIResponse.fail(ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIResponse<Void>> handleGeneralException(Exception ex) {
         log.error("Exception occurred: {}, Type: {}", ex.getMessage(), ex.getClass().getSimpleName());

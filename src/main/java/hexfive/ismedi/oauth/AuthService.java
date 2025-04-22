@@ -3,7 +3,7 @@ package hexfive.ismedi.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.domain.User;
-import hexfive.ismedi.exception.DuplicateEmailException;
+import hexfive.ismedi.global.CustomException;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static hexfive.ismedi.domain.User.Gender.MAN;
 import static hexfive.ismedi.domain.User.Gender.WOMAN;
+import static hexfive.ismedi.global.ErrorCode.DUPLICATE_EMAIL;
 
 @Slf4j
 @Service
@@ -201,7 +202,7 @@ public class AuthService {
     public Map<String, Object> signup(SignupRequestDto request) {
         // 1. 이메일 중복 체크
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateEmailException("이미 가입된 이메일입니다.");
+            throw new CustomException(DUPLICATE_EMAIL);
         }
 
         // 2. User 엔티티 생성 및 저장
@@ -238,7 +239,7 @@ public class AuthService {
             return Map.of("token", token, "userInfo", userInfo);
 
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateEmailException("이미 가입된 이메일입니다.");
+            throw new CustomException(DUPLICATE_EMAIL);
         }
     }
 }

@@ -1,13 +1,10 @@
 package hexfive.ismedi.oauth;
 
-import hexfive.ismedi.exception.DuplicateEmailException;
 import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.global.CustomException;
 import hexfive.ismedi.global.ErrorCode;
-import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.users.UserRepository;
-import hexfive.ismedi.users.UserService;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,15 +16,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
+
+import static hexfive.ismedi.global.ErrorCode.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -67,22 +63,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "토큰 발급 또는 사용자 정보 조회 실패")
     })
     @GetMapping("/login/kakao/callback")
-    public ResponseEntity<?> kakaoCallback(@RequestParam String code){
-        try {
-            KaKaoLoginResultDto result = authService.kakaoLogin(code);
-            return ResponseEntity.ok(APIResponse.success(result));
-        } catch (Exception e) {
-            ErrorCode errorCode = ErrorCode.INTERNAL_ERROR;
-            return ResponseEntity.status(errorCode.getStatus())
-                    .body(APIResponse.fail(
-                            Map.of(
-                                    "code", errorCode.getCode(),
-                                    "status", errorCode.getStatus()
-                            ),
-                            e.getMessage()
-                    ));
-        }
-
+    public APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code){
+        KaKaoLoginResultDto result = authService.kakaoLogin(code);
+        return APIResponse.success(result);
     }
 
     @Operation(
@@ -100,34 +83,17 @@ public class AuthController {
     })
     @Parameter(hidden = true)
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String header){
+    public APIResponse<TokenDto> reissueToken(@RequestHeader("Authorization") String header){
         if (header == null || !header.startsWith("Bearer ")) {
-            ErrorCode errorCode = ErrorCode.MISSING_TOKEN;
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(APIResponse.fail(
-                            Map.of(
-                                    "code", errorCode.getCode(),
-                                    "status", errorCode.getStatus()
-                            ),
-                            errorCode.getMessage()
-                    ));
+            throw new CustomException(MISSING_TOKEN);
         }
 
         String refreshToken = header.substring(7);
-
         try {
             TokenDto newToken = authService.reissueAccessToken(refreshToken);
-            return ResponseEntity.ok(APIResponse.success(newToken));
+            return APIResponse.success(newToken);
         } catch (JwtException e) {
-            ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(APIResponse.fail(
-                            Map.of(
-                                "code", errorCode.getCode(),
-                                "status", errorCode.getStatus()
-                            ),
-                            e.getMessage()
-                    ));
+            throw new CustomException(INVALID_TOKEN);
         }
     }
 
@@ -140,34 +106,18 @@ public class AuthController {
             security = @SecurityRequirement(name = "JWT")
     )
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String header) {
+    public APIResponse<String> logout(@RequestHeader("Authorization") String header) {
         if (header == null || !header.startsWith("Bearer ")) {
-            ErrorCode errorCode = ErrorCode.MISSING_TOKEN;
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
+            throw new CustomException(MISSING_TOKEN);
         }
 
         String token = header.substring(7);
         boolean logoutSuccess = authService.logout(token);
 
         if(!logoutSuccess){
-            ErrorCode errorCode = ErrorCode.LOGOUT_FAILED;
-            return ResponseEntity.ok(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
+            throw new CustomException(LOGOUT_FAILED);
         }
-        return ResponseEntity.ok(APIResponse.success(
-                "로그아웃 되었습니다."
-        ));
+        return APIResponse.success("로그아웃 되었습니다.");
     }
 
     @Operation(
@@ -182,41 +132,8 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "입력값 유효성 검사 실패 또는 중복 이메일")
     })
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody @Valid SignupRequestDto request, BindingResult bindingResult){
-        // @Valid 결과
-        if(bindingResult.hasErrors()){
-            ErrorCode errorCode = ErrorCode.VALIDATION_FAILED;
-            String message = bindingResult.getAllErrors().get(0).getDefaultMessage();
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                        "code", errorCode.getCode(),
-                        "status", errorCode.getStatus()
-                    ),
-                    message
-            ));
-        }
-
-        try {
-            Map<String, Object> result = authService.signup(request);
-            return ResponseEntity.ok(APIResponse.success(result));
-        } catch (DuplicateEmailException e) {
-            ErrorCode errorCode = ErrorCode.DUPLICATE_EMAIL;
-            return ResponseEntity.badRequest().body(APIResponse.fail(
-                    Map.of(
-                            "code", errorCode.getCode(),
-                            "status", errorCode.getStatus()
-                    ),
-                    errorCode.getMessage()
-            ));
-        }
+    public APIResponse<?> signup(@RequestBody @Valid SignupRequestDto request){
+        Map<String, Object> result = authService.signup(request);
+        return APIResponse.success(result);
     }
 }
-
-
-
-
-
-
-
-
-
