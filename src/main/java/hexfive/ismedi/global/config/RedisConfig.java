@@ -1,4 +1,4 @@
-package hexfive.ismedi.config;
+package hexfive.ismedi.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

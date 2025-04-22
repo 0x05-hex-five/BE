@@ -2,7 +2,7 @@ package hexfive.ismedi.openApi;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexfive.ismedi.global.CustomException;
+import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
@@ -18,7 +18,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static hexfive.ismedi.global.ErrorCode.*;
+import static hexfive.ismedi.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service

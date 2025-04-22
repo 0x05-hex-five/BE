@@ -1,4 +1,4 @@
-package hexfive.ismedi.config;
+package hexfive.ismedi.global.config;
 
 import hexfive.ismedi.jwt.JwtAuthenticationFilter;
 import hexfive.ismedi.jwt.JwtProvider;

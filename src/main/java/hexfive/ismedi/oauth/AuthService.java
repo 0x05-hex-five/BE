@@ -3,7 +3,7 @@ package hexfive.ismedi.oauth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.domain.User;
-import hexfive.ismedi.global.CustomException;
+import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
@@ -31,7 +31,7 @@ import java.util.Optional;
 
 import static hexfive.ismedi.domain.User.Gender.MAN;
 import static hexfive.ismedi.domain.User.Gender.WOMAN;
-import static hexfive.ismedi.global.ErrorCode.DUPLICATE_EMAIL;
+import static hexfive.ismedi.global.exception.ErrorCode.DUPLICATE_EMAIL;
 
 @Slf4j
 @Service

@@ -1,4 +1,4 @@
-package hexfive.ismedi.global;
+package hexfive.ismedi.global.response;
 
 import lombok.Builder;
 import lombok.Getter;

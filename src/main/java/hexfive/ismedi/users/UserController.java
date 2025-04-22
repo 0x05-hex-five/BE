@@ -1,7 +1,7 @@
 package hexfive.ismedi.users;
 
 
-import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.global.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;

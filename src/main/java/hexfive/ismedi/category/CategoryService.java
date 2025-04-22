@@ -3,14 +3,14 @@ package hexfive.ismedi.category;
 import hexfive.ismedi.category.dto.CreateCategoryDto;
 import hexfive.ismedi.category.dto.ResCategoryDto;
 import hexfive.ismedi.category.dto.UpdateCategoryDto;
-import hexfive.ismedi.global.CustomException;
+import hexfive.ismedi.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static hexfive.ismedi.global.ErrorCode.CATEGORY_NOT_FOUND;
+import static hexfive.ismedi.global.exception.ErrorCode.CATEGORY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
