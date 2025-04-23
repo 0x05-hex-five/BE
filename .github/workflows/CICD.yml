@@ -38,6 +38,9 @@ jobs:
           mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
+      - name: 디렉토리 구조 확인
+        run: ls -R
+
       - name: 배포 파일 업로드
         uses: appleboy/scp-action@v0.1.4
         with:
