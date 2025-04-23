@@ -3,7 +3,7 @@ package hexfive.ismedi.category;
 import hexfive.ismedi.category.dto.CreateCategoryDto;
 import hexfive.ismedi.category.dto.ResCategoryDto;
 import hexfive.ismedi.category.dto.UpdateCategoryDto;
-import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.global.response.APIResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

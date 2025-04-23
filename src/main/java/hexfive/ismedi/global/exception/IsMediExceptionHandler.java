@@ -1,5 +1,6 @@
-package hexfive.ismedi.global;
+package hexfive.ismedi.global.exception;
 
+import hexfive.ismedi.global.response.APIResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class IsMediExceptionHandler {
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<APIResponse<Void>> handleGeneralException(CustomException ex) {
+        log.error("Exception occurred: {}, Type: {}", ex.getMessage(), ex.getClass().getSimpleName());
+
+        return ResponseEntity
+                .status(ex.getErrorCode().getStatus())
+                .body(APIResponse.fail(ex.getMessage()));
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIResponse<Void>> handleGeneralException(Exception ex) {
