@@ -38,19 +38,13 @@ jobs:
           mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
-      - name: 현재 위치 변경
-        run: cd ..
-
       - name: 배포 파일 업로드
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: |
-            scripts/deploy.sh
-            docker-compose.yml
-            config/application.properties
+          source: scripts/deploy.sh docker-compose.yml config/application.properties
           target: ~/ismedi/
 
       - name: 배포 스크립트 실행
