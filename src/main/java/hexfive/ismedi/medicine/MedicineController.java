@@ -1,6 +1,7 @@
 package hexfive.ismedi.medicine;
 
-import hexfive.ismedi.global.APIResponse;
+import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.swagger.MedicineControllerDocs;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/medicines")
-public class MedicineController {
+public class MedicineController implements MedicineControllerDocs {
 
     private final MedicineService medicineService;
 
