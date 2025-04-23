@@ -3,19 +3,19 @@
 set -e
 
 APP_DIR=~/ismedi
-cd $APP_DIR
+cd "$APP_DIR"
 
 if ! command -v docker &> /dev/null; then
-    sudo yum update -y
-    sudo yum install docker -y
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    apt update -y
+    apt install -y docker.io
+    systemctl start docker
+    systemctl enable docker
 fi
 echo "[1] docker 설치 완료"
 
 if ! command -v docker-compose &> /dev/null; then
-  sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
 fi
 echo "[2] docker-compose 설치 완료"
 
