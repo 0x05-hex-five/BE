@@ -38,8 +38,8 @@ jobs:
           mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
-      - name: 현재 위치 확인
-        run: pwd
+      - name: 현재 위치 변경
+        run: cd ..
 
       - name: 배포 파일 업로드
         uses: appleboy/scp-action@v0.1.4
