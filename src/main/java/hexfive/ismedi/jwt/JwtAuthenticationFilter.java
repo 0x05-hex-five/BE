@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(
-                    APIResponse.fail(error, errorCode.getMessage())
+                    APIResponse.fail(errorCode.getMessage())
             );
 
             httpResponse.getWriter().write(json);
@@ -81,7 +81,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(
-                        APIResponse.fail(errorObject, errorCode.getMessage())
+                        APIResponse.fail(errorCode.getMessage())
                 );
 
                 httpResponse.getWriter().write(json);
@@ -101,7 +101,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(
-                        APIResponse.fail(error, errorCode.getMessage())
+                        APIResponse.fail(errorCode.getMessage())
                 );
 
                 httpResponse.getWriter().write(json);
