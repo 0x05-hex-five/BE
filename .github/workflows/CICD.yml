@@ -35,6 +35,7 @@ jobs:
 
       - name: application.properties 생성
         run: |
+          mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
       - name: .env 생성
@@ -75,7 +76,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: config/application.properties
-          target: ~/ismedi/config/
+          target: ~/ismedi/
 
       - name: 배포 스크립트 실행
         uses: appleboy/ssh-action@v0.1.10
