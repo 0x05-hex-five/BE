@@ -36,7 +36,7 @@ public class MedicineService {
                         .itemName(pt.getItemName())
                         .etcOtcCodeName(pt.getEtcOtcCodeName())
                         .classNoName(pt.getClassNoName())
-
+                        .itemImage(di.getItemImage())
                         .efcyQesitm(di.getEfcyQesitm())
                         .useMethodQesitm(di.getUseMethodQesitm())
                         .atpnQesitm(di.getAtpnQesitm())
