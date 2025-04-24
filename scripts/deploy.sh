@@ -21,7 +21,7 @@ echo "[2] docker-compose 설치 완료"
 
 echo "컨테이너 재시작"
 sudo docker-compose down
-DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" sudo docker-compose pull
-DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}" DB_USER_PASSWORD="${DB_USER_PASSWORD}" sudo docker-compose up -d
+sudo docker-compose pull
+sudo docker-compose up -d
 
 echo "[✅ 배포 완료]"
