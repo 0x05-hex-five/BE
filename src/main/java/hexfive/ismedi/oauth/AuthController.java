@@ -44,8 +44,8 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/login/app")
     public APIResponse<KaKaoLoginResultDto> kakaoAppLogin(@RequestHeader("Authorization") String header){
-        String AuthorizationCode = header.substring(7);
-        return APIResponse.success(authService.kakaoLoginByAccessToken(AuthorizationCode));
+        String accessToken = header.substring(7);
+        return APIResponse.success(authService.kakaoLoginByAccessToken(accessToken));
     }
 
     @GetMapping("/login/kakao/callback")
