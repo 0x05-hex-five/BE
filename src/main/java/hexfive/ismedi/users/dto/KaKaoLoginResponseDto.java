@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class KaKaoLoginResultDto {
+public class KaKaoLoginResponseDto {
     private boolean isNew;          // 신규 회원 여부
     private TokenDto token;         // 기존 회원이면 토큰 포함
     @JsonProperty("user")

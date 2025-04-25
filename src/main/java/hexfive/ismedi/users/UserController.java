@@ -7,9 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -27,5 +25,26 @@ public class UserController {
     public ResponseEntity<?> test(){
 
         return ResponseEntity.ok(APIResponse.success("test ok"));
+    }
+
+    // GET /api/users/id
+    @GetMapping("/{id}")
+    public APIResponse<?> findById(@PathVariable Long id){
+
+        return APIResponse.success("");
+    }
+
+    // PATCH /api/users/id
+    @PatchMapping("/{id}")
+    public APIResponse<?> updateUser(@PathVariable Long id){
+
+        return APIResponse.success("");
+    }
+
+    // DELETE /api/users/id
+    @DeleteMapping("/{id}")
+    public APIResponse<?> deleteUser(@PathVariable Long id){
+
+        return APIResponse.success("");
     }
 }

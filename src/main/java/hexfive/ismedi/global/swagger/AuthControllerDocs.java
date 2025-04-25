@@ -3,7 +3,7 @@ package hexfive.ismedi.global.swagger;
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
+import hexfive.ismedi.users.dto.KaKaoLoginResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +24,7 @@ public interface AuthControllerDocs {
             @ApiResponse(responseCode = "400", description = "토큰 발급 또는 사용자 정보 조회 실패")
     })
     @GetMapping("/login/kakao/callback")
-    APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code);
+    APIResponse<KaKaoLoginResponseDto> kakaoCallback(@RequestParam String code);
 
     @Operation(summary = "Access Token 재발급",
             description = "Refresh Token을 검증한 후 Access Token을 재발급합니다.",

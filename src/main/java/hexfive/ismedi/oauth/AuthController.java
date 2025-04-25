@@ -5,7 +5,7 @@ import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.global.swagger.AuthControllerDocs;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
+import hexfive.ismedi.users.dto.KaKaoLoginResponseDto;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +42,8 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @GetMapping("/login/kakao/callback")
-    public APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code){
-        KaKaoLoginResultDto result = authService.kakaoLogin(code);
+    public APIResponse<KaKaoLoginResponseDto> kakaoCallback(@RequestParam String code){
+        KaKaoLoginResponseDto result = authService.kakaoLogin(code);
         return APIResponse.success(result);
     }
 

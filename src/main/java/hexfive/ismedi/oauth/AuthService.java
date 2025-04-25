@@ -10,7 +10,7 @@ import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.oauth.dto.SignupResponseDto;
 import hexfive.ismedi.users.UserRepository;
-import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
+import hexfive.ismedi.users.dto.KaKaoLoginResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,16 +51,16 @@ public class AuthService {
     @Value("${kakao.client-secret}")
     private String clientSecret;
 
-    public KaKaoLoginResultDto kakaoLogin(String code) {
+    public KaKaoLoginResponseDto kakaoLogin(String code) {
         String kakaoAccessToken = getAccessToken(code);
 
         KakaoUserInfoDto userInfo = getUserInfoByAccessToken(kakaoAccessToken);
 
-        KaKaoLoginResultDto result = loginOrJoin(userInfo);
+        KaKaoLoginResponseDto result = loginOrJoin(userInfo);
 
         // 신규 회원
         if (result.isNew()) {
-            return KaKaoLoginResultDto.builder()
+            return KaKaoLoginResponseDto.builder()
                     .isNew(true)
                     .userInfo(result.getUserInfo())
                     .build();
@@ -78,7 +78,7 @@ public class AuthService {
                 .userId(user.getId())
                 .build();
 
-        return KaKaoLoginResultDto.builder()
+        return KaKaoLoginResponseDto.builder()
                 .isNew(false)
                 .userInfo(result.getUserInfo())
                 .token(tokenDto)
@@ -172,19 +172,19 @@ public class AuthService {
     }
 
     // 전달받은 사용자의 데이터를 확인 후 로그인 / 회원가입 분기처리 하는 메서드
-    public KaKaoLoginResultDto loginOrJoin(KakaoUserInfoDto kakaoUserInfoDto){
+    public KaKaoLoginResponseDto loginOrJoin(KakaoUserInfoDto kakaoUserInfoDto){
         // 이메일로 회원 조회
         Optional<User> optionalUser = userRepository.findByEmail(kakaoUserInfoDto.getEmail());
 
         // 기존 회원
         if (optionalUser.isPresent()) {
-            return KaKaoLoginResultDto.builder()
+            return KaKaoLoginResponseDto.builder()
                     .isNew(false)
                     .userInfo(kakaoUserInfoDto)
                     .build();
         }
         // 신규 회원
-        return KaKaoLoginResultDto.builder()
+        return KaKaoLoginResponseDto.builder()
                 .isNew(true)
                 .userInfo(kakaoUserInfoDto)
                 .build();
