@@ -33,7 +33,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        if (httpRequest.getRequestURI().equals("/api/auth/reissue") || httpRequest.getRequestURI().equals("/api/auth/logout")) {
+        if (
+                httpRequest.getRequestURI().equals("/api/auth/reissue")
+                        || httpRequest.getRequestURI().equals("/api/auth/logout")
+                        || httpRequest.getRequestURI().equals("/api/auth/login/app")) {
             chain.doFilter(request, response);
             return;
         }

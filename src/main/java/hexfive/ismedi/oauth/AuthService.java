@@ -51,11 +51,16 @@ public class AuthService {
     @Value("${kakao.client-secret}")
     private String clientSecret;
 
-    public KaKaoLoginResultDto kakaoLogin(String code) {
-        String kakaoAccessToken = getAccessToken(code);
+    public KaKaoLoginResultDto kakaoLoginByAuthorizationCode(String AuthorizationCode){
+        return handleKakaoLogin(getAccessToken(AuthorizationCode));
+    }
 
+    public KaKaoLoginResultDto kakaoLoginByAccessToken(String kakaoAccessToken){
+        return handleKakaoLogin(kakaoAccessToken);
+    }
+
+    private KaKaoLoginResultDto handleKakaoLogin(String kakaoAccessToken){
         KakaoUserInfoDto userInfo = getUserInfoByAccessToken(kakaoAccessToken);
-
         KaKaoLoginResultDto result = loginOrJoin(userInfo);
 
         // 신규 회원
