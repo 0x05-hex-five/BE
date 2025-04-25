@@ -2,6 +2,7 @@ package hexfive.ismedi.users;
 
 
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.users.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,8 @@ public class UserController {
 
     // GET /api/users/id
     @GetMapping("/{id}")
-    public APIResponse<?> findById(@PathVariable Long id){
-
-        return APIResponse.success("");
+    public APIResponse<UserResponseDto> findById(@PathVariable Long id){
+        return APIResponse.success(userService.findById(id));
     }
 
     // PATCH /api/users/id
