@@ -30,7 +30,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public APIResponse<?> deleteUserInfo(@PathVariable Long id){
-
-        return APIResponse.success("");
+        userService.deleteUserInfo(id);
+        return APIResponse.success(null);
     }
 }
