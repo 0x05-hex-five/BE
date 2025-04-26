@@ -4,8 +4,9 @@ import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.global.swagger.AuthControllerDocs;
 import hexfive.ismedi.jwt.TokenDto;
+import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
-import hexfive.ismedi.users.dto.KaKaoLoginResponseDto;
+import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +42,15 @@ public class AuthController implements AuthControllerDocs {
         return new RedirectView(kakaoAuthUrl);
     }
 
+    @PostMapping("/login/app")
+    public APIResponse<KaKaoLoginResultDto> kakaoAppLogin(@RequestHeader("Authorization") String header){
+        String accessToken = header.substring(7);
+        return APIResponse.success(authService.kakaoLoginByAccessToken(accessToken));
+    }
+
     @GetMapping("/login/kakao/callback")
-    public APIResponse<KaKaoLoginResponseDto> kakaoCallback(@RequestParam String code){
-        KaKaoLoginResponseDto result = authService.kakaoLogin(code);
-        return APIResponse.success(result);
+    public APIResponse<KaKaoLoginResultDto> kakaoCallback(@RequestParam String code){
+        return APIResponse.success(authService.kakaoLoginByAuthorizationCode(code));
     }
 
     @PostMapping("/reissue")
