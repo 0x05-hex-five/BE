@@ -33,4 +33,10 @@ public class UserService {
         );
         return UserResponseDto.fromEntity(user);
     }
+
+    public void deleteUserInfo(Long id){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        userRepository.delete(user);
+    }
 }
