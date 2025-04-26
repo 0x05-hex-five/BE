@@ -29,29 +29,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 기본 인증과 csrf 비활성화
-        http.httpBasic(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
 
-        // 세션 사용 안 함
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // URI 별 접근 권한 설정
-        http.authorizeHttpRequests(auth -> auth
+        http.httpBasic(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers( // 인증 없이 허용할 URI
                         "/api/auth/**",
                         "/api/interactions/**",
                         "/api/medicines/**",
                         "/api/fetch/**",
-                        // Swagger 세팅
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**"
                 ).permitAll()
-                .anyRequest().authenticated() // 나머지는 인증 필요
-        ).addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
-        // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .anyRequest().authenticated())
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
