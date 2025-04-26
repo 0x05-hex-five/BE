@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @SecurityScheme(
         name = "JWT",
@@ -30,7 +31,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.httpBasic(AbstractHttpConfigurer::disable)
+        http
+//            .cors(cors -> cors.configurationSource(request -> {
+//                CorsConfiguration config = new CorsConfiguration();
+//                config.addAllowedOrigin("http://localhost:3000");     // 개발용
+//                //config.addAllowedOrigin("domain");                  // 배포용
+//                config.addAllowedMethod("OPTIONS", "GET", "POST", "PUT", "DELETE");
+//                config.addAllowedHeader("*");
+//                config.setAllowCredentials(true);                     // 프론트에서 쿠키 사용할 경우 열어둠
+//                config.setMaxAge(3600L);                              // preflight (OPTIONS 응답 결과) 캐싱 시간
+//                return config;
+//            }))
+            .httpBasic(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
