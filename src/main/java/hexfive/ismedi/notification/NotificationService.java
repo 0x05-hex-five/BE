@@ -1,5 +1,6 @@
 package hexfive.ismedi.notification;
 
+import hexfive.ismedi.category.Category;
 import hexfive.ismedi.domain.User;
 import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.notification.dto.NotificationDto;
@@ -65,5 +66,17 @@ public class NotificationService {
         notificationRepository.save(notification);
 
         return ResNotificationDto.fromEntity(notification);
+    }
+
+    public void deleteNotification(Long userId, Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(NOTIFICATION_NOT_FOUND, notificationId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND, userId));
+        if (!notification.getUser().equals(user))
+            throw new CustomException(UNAUTHORIZED_ACCESS);
+
+        notificationRepository.delete(notification);
     }
 }

@@ -44,4 +44,13 @@ public class NotificationController {
         Long userId = Long.parseLong(userDetails.getUsername());
         return APIResponse.success(notificationService.updateNotification(userId, id, updateNotificationDto));
     }
+
+    @DeleteMapping("/{id}")
+    public APIResponse<Void> deleteNotification(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        notificationService.deleteNotification(userId, id);
+        return APIResponse.success(null);
+    }
 }
