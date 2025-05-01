@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-public interface AuthControllerDocs {
+public interface AuthDocs {
 
     @Operation(summary = "웹 카카오 로그인 요청", description = "카카오 인증 서버로 리다이렉트합니다.")
     @GetMapping("/login")
