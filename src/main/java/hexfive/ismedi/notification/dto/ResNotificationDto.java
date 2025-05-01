@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalTime;
 
 @Getter
 @NoArgsConstructor
@@ -15,7 +15,7 @@ import java.util.Date;
 public class ResNotificationDto {
     private Long id;
     private String name;
-    private Date time;
+    private LocalTime time;
 
     public static ResNotificationDto fromEntity(Notification notification) {
         return ResNotificationDto.builder()

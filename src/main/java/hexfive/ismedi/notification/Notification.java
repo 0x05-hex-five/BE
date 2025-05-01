@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -27,5 +27,5 @@ public class Notification {
     private User user;
 
     @Column(nullable = false)
-    private Date time;
+    private LocalTime time;
 }
