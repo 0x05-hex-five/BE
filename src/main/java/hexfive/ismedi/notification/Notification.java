@@ -1,8 +1,18 @@
-package hexfive.ismedi.domain;
+package hexfive.ismedi.notification;
+import hexfive.ismedi.domain.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.*;
 
 @Entity
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "Notification")
 public class Notification {
     @Id
