@@ -50,4 +50,20 @@ public class NotificationService {
                 .map(ResNotificationDto::fromEntity)
                 .toList();
     }
+
+    public ResNotificationDto updateNotification(Long userId, Long notificationId, NotificationDto notificationDto) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(NOTIFICATION_NOT_FOUND, notificationId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND, userId));
+        if (!notification.getUser().equals(user))
+            throw new CustomException(UNAUTHORIZED_ACCESS);
+
+        notification.update(notificationDto);
+
+        notificationRepository.save(notification);
+
+        return ResNotificationDto.fromEntity(notification);
+    }
 }

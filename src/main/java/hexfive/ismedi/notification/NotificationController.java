@@ -36,4 +36,12 @@ public class NotificationController {
         Long userId = Long.parseLong(userDetails.getUsername());
         return APIResponse.success(notificationService.getAllNotifications(userId));
     }
+
+    @PutMapping("/{id}")
+    public APIResponse<ResNotificationDto> updateNotification(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id, @Valid @RequestBody NotificationDto updateNotificationDto) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        return APIResponse.success(notificationService.updateNotification(userId, id, updateNotificationDto));
+    }
 }

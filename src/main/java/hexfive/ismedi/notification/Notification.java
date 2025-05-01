@@ -1,5 +1,6 @@
 package hexfive.ismedi.notification;
 import hexfive.ismedi.domain.User;
+import hexfive.ismedi.notification.dto.NotificationDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +29,9 @@ public class Notification {
 
     @Column(nullable = false)
     private LocalTime time;
+
+    public void update(NotificationDto notificationDto) {
+        this.name = notificationDto.getName();
+        this.time = notificationDto.getTime();
+    }
 }
