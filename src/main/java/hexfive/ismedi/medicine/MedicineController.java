@@ -2,6 +2,7 @@ package hexfive.ismedi.medicine;
 
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.swagger.MedicineControllerDocs;
+import hexfive.ismedi.medicine.dto.ResInteractionDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,10 @@ public class MedicineController implements MedicineControllerDocs {
     @GetMapping("/{id}")
     public APIResponse<ResMedicineDetailDto> searchMedicines(@PathVariable Long id){
         return APIResponse.success(medicineService.getMedicine(id));
+    }
+
+    @GetMapping("/interactions/{id1}/{id2}")
+    public APIResponse<ResInteractionDto> checkInteraction(@PathVariable Long id1, @PathVariable Long id2) throws Exception {
+        return APIResponse.success(medicineService.checkInteraction(id1, id2));
     }
 }

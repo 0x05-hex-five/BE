@@ -34,8 +34,9 @@ public enum ErrorCode {
     INVALID_API_TYPE("INVALID_API_TYPE", "지원하지 않는 API 타입입니다: %s", HttpStatus.BAD_REQUEST),
     MISMATCH_COUNT("MISMATCH_COUNT", "처리된 건수 불일치: 저장 %d + 스킵 %d ≠ 전체 %d", HttpStatus.BAD_REQUEST),
 
-    // Category
+    // ID NOT FOUND
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "카테고리(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+    MEDICINE_NOT_FOUND("MEDICINE_NOT_FOUND", "약(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
 
     // 기타
     INTERNAL_ERROR("INTERNAL_ERROR", "서버 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);

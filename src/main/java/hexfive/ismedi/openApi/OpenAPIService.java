@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static hexfive.ismedi.global.exception.ErrorCode.*;
@@ -43,6 +44,7 @@ public class OpenAPIService {
             PageResult result = switch (apiType) {
                 case DRUG_INFO -> fetchDrugInfoPage(apiType, pageNo);
                 case PRESCRIPTION_TYPE -> fetchPrescriptionTypePage(apiType, pageNo);
+                default -> throw new IllegalStateException("지원하지 않는 API type입니다: " + apiType);
             };
 
             totalCount = result.totalCount();
@@ -61,7 +63,7 @@ public class OpenAPIService {
 
     // 페이지별 수집 - DRUG_INFO
     public PageResult fetchDrugInfoPage(APIType apiType, int pageNo) throws Exception {
-        OpenAPIResponse<DrugInfo> response = fetch(apiType, pageNo);
+        OpenAPIResponse<DrugInfo> response = fetch(apiType, pageNo, null);
         List<DrugInfo> items = response.getBody().getItems();
 
         List<DrugInfo> toSave = items.stream()
@@ -75,7 +77,7 @@ public class OpenAPIService {
 
     // 페이지별 수집 - PRESCRIPTION_TYPE
     public PageResult fetchPrescriptionTypePage(APIType apiType, int pageNo) throws Exception {
-        OpenAPIResponse<PrescriptionType> response = fetch(apiType, pageNo);
+        OpenAPIResponse<PrescriptionType> response = fetch(apiType, pageNo, null);
         List<PrescriptionType> items = response.getBody().getItems();
 
         List<PrescriptionType> toSave = items.stream()
@@ -88,13 +90,23 @@ public class OpenAPIService {
     }
 
     // 공통 호출 로직
-    private <T> OpenAPIResponse<T> fetch(APIType apiType, int pageNo) throws Exception {
+    public <T> OpenAPIResponse<T> fetch(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
         String apiUrl = apiType.getUrl();
         String type = "json";
-        String uriStr = String.format("%s?serviceKey=%s&pageNo=%d&numOfRows=%d&type=%s",
-                apiUrl, serviceKey, pageNo, MAX_ROW_CNT, type);
+        StringBuilder uriBuilder = new StringBuilder();
+        uriBuilder.append(apiUrl)
+                .append("?serviceKey=").append(serviceKey)
+                .append("&pageNo=").append(pageNo)
+                .append("&numOfRows=").append(MAX_ROW_CNT)
+                .append("&type=").append(type);
 
-        URI uri = new URI(uriStr);
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                uriBuilder.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+            }
+        }
+
+        URI uri = new URI(uriBuilder.toString());
         log.info("uri: {}", uri);
 
         RestTemplate template = new RestTemplate();
@@ -103,6 +115,7 @@ public class OpenAPIService {
         JavaType javaType = objectMapper.getTypeFactory()
                 .constructParametricType(OpenAPIResponse.class, apiType.getEntity());
 
+        log.info("{}", jsonResponse);
         return objectMapper.readValue(jsonResponse, javaType);
     }
 }
