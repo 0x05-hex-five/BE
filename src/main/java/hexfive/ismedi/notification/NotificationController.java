@@ -1,6 +1,7 @@
 package hexfive.ismedi.notification;
 
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.swagger.NotificationDocs;
 import hexfive.ismedi.notification.dto.NotificationDto;
 import hexfive.ismedi.notification.dto.ResNotificationDto;
 import jakarta.validation.Valid;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController implements NotificationDocs {
     private final NotificationService notificationService;
 
     @PostMapping
