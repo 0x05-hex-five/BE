@@ -14,6 +14,7 @@ public enum ErrorCode {
     LOGOUT_TOKEN("LOGOUT_TOKEN", "로그아웃된 토큰입니다", HttpStatus.UNAUTHORIZED),
     MISSING_TOKEN("MISSING_TOKEN", "Access Token이 없습니다", HttpStatus.UNAUTHORIZED),
     LOGOUT_FAILED("LOGOUT_FAILED", "로그아웃 처리 중 문제가 발생했습니다. 토큰이 이미 만료되었거나 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "해당 데이터에 대한 접근 권한이 없습니다", HttpStatus.FORBIDDEN),
 
     // Redis 관련
     REDIS_ERROR("REDIS_ERROR", "토큰 저장소(Redis) 처리 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -38,6 +39,12 @@ public enum ErrorCode {
 
     // Category
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "카테고리(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+
+    // Notification
+    NOTIFICATION_NOT_FOUND("CATEGORY_NOT_FOUND", "알림(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+
+    // User
+    USER_NOT_FOUND("CATEGORY_NOT_FOUND", "사용자(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
 
     // 기타
     INTERNAL_ERROR("INTERNAL_ERROR", "서버 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
