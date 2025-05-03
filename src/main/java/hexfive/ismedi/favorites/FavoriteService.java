@@ -3,7 +3,6 @@ package hexfive.ismedi.favorites;
 import hexfive.ismedi.domain.User;
 import hexfive.ismedi.favorites.dto.ResFavoriteDto;
 import hexfive.ismedi.global.exception.CustomException;
-import hexfive.ismedi.global.exception.ErrorCode;
 import hexfive.ismedi.medicine.Medicine;
 import hexfive.ismedi.medicine.MedicineRepository;
 import hexfive.ismedi.users.UserRepository;
@@ -15,7 +14,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static hexfive.ismedi.global.exception.ErrorCode.FAVORITE_ALREADY_EXISTS;
 import static hexfive.ismedi.global.exception.ErrorCode.USER_NOT_FOUND;
+import static hexfive.ismedi.global.exception.ErrorCode.MEDICINE_NOT_FOUND;
+import static hexfive.ismedi.global.exception.ErrorCode.FAVORITE_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +29,13 @@ public class FavoriteService {
     public void addFavorite(Long userId, Long medicineId) {
         boolean exists = favoriteRepository.existsByUserIdAndMedicineId(userId, medicineId);
         if (exists) {
-            throw new IllegalStateException("이미 즐겨찾기된 약입니다.");
+            throw new CustomException(FAVORITE_ALREADY_EXISTS);
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         Medicine medicine = medicineRepository.findById(medicineId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 약을 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(MEDICINE_NOT_FOUND));
 
         Favorite favorite = Favorite.builder()
                 .user(user)
@@ -54,7 +56,7 @@ public class FavoriteService {
     @Transactional
     public void removeFavorite(Long userId, Long medicineId){
         Favorite favorite = favoriteRepository.findByUserIdAndMedicineId(userId, medicineId)
-                .orElseThrow(() -> new IllegalArgumentException("즐겨찾기 내역이 없습니다."));
+                .orElseThrow(() -> new CustomException(FAVORITE_NOT_FOUND));
         favoriteRepository.delete(favorite);
     }
 }
