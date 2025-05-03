@@ -2,6 +2,7 @@ package hexfive.ismedi.users;
 
 
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.swagger.UserControllerDocs;
 import hexfive.ismedi.users.dto.UpdateRequestDto;
 import hexfive.ismedi.users.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 @SecurityRequirement(name = "JWT")
-public class UserController {
+public class UserController implements UserControllerDocs {
     private final UserService userService;
 
     @GetMapping("/{id}")
