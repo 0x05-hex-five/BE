@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "JWT")
-public interface UserControllerDocs {
+public interface UserDocs {
 
     @Operation(summary = "회원 정보 조회", description = "로그인한 사용자의 정보를 조회합니다. 다른 사용자의 ID를 요청하면 403 에러가 발생합니다.")
     @ApiResponses(value = {
