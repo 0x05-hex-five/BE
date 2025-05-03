@@ -26,7 +26,10 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUserInfo(Long id, UpdateRequestDto updateRequestDto){
+    public UserResponseDto updateUserInfo(Long loginUserId, Long id, UpdateRequestDto updateRequestDto){
+        if (!loginUserId.equals(id)) {
+            throw new CustomException(ACCESS_DENIED);
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         user.updateUserInfo(
@@ -39,7 +42,10 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserInfo(Long id){
+    public void deleteUserInfo(Long loginUserId, Long id){
+        if (!loginUserId.equals(id)) {
+            throw new CustomException(ACCESS_DENIED);
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         userRepository.delete(user);

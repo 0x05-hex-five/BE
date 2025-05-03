@@ -21,19 +21,31 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public APIResponse<UserResponseDto> getUserInfo(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+    public APIResponse<UserResponseDto> getUserInfo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
         return APIResponse.success(userService.getUserInfo(loginUserId, id));
     }
 
     @PatchMapping("/{id}")
-    public APIResponse<UserResponseDto> updateUserInfo(@PathVariable Long id, @Valid @RequestBody UpdateRequestDto updateRequestDto){
-        return APIResponse.success(userService.updateUserInfo(id, updateRequestDto));
+    public APIResponse<UserResponseDto> updateUserInfo(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRequestDto updateRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        return APIResponse.success(userService.updateUserInfo(loginUserId, id, updateRequestDto));
     }
 
     @DeleteMapping("/{id}")
-    public APIResponse<?> deleteUserInfo(@PathVariable Long id){
-        userService.deleteUserInfo(id);
+    public APIResponse<?> deleteUserInfo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        userService.deleteUserInfo(loginUserId, id);
         return APIResponse.success(null);
     }
 }
