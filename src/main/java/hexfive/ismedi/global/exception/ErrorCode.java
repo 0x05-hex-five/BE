@@ -34,6 +34,7 @@ public enum ErrorCode {
 
     // User
     USER_NOT_FOUND("USER_NOT_FOUND", "해당 사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ACCESS_DENIED("ACCESS_DENIED", "해당 리소스에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     // Category
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "카테고리(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),

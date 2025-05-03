@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static hexfive.ismedi.global.exception.ErrorCode.ACCESS_DENIED;
 import static hexfive.ismedi.global.exception.ErrorCode.USER_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -15,7 +16,10 @@ import static hexfive.ismedi.global.exception.ErrorCode.USER_NOT_FOUND;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserResponseDto getUserInfo(Long id){
+    public UserResponseDto getUserInfo(Long loginUserId, Long id){
+        if (!loginUserId.equals(id)) {
+            throw new CustomException(ACCESS_DENIED);
+        }
         return userRepository.findById(id)
                 .map(UserResponseDto::fromEntity)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));

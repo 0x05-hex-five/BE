@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -19,8 +21,9 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public APIResponse<UserResponseDto> getUserInfo(@PathVariable Long id){
-        return APIResponse.success(userService.getUserInfo(id));
+    public APIResponse<UserResponseDto> getUserInfo(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        return APIResponse.success(userService.getUserInfo(loginUserId, id));
     }
 
     @PatchMapping("/{id}")
