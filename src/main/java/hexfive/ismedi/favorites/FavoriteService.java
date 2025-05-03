@@ -45,7 +45,7 @@ public class FavoriteService {
         favoriteRepository.save(favorite);
     }
 
-    public List<ResFavoriteDto> getFavoriteById(Long userId){
+    public List<ResFavoriteDto> getFavoriteByUserId(Long userId){
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         if (favorites.isEmpty()) {
             return Collections.emptyList();

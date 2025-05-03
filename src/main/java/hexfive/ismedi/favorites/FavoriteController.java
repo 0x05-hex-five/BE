@@ -25,7 +25,7 @@ public class FavoriteController {
     @GetMapping
     public APIResponse<List<ResFavoriteDto>> getAllFavorites(@AuthenticationPrincipal UserDetails userDetails){
         Long userId = Long.parseLong(userDetails.getUsername());
-        return APIResponse.success(favoriteService.getFavoriteById(userId));
+        return APIResponse.success(favoriteService.getFavoriteByUserId(userId));
     }
 
     @DeleteMapping("/{medicine-id}")
