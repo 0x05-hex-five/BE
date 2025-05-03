@@ -34,6 +34,7 @@ public class UserService {
         return UserResponseDto.fromEntity(user);
     }
 
+    @Transactional
     public void deleteUserInfo(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
