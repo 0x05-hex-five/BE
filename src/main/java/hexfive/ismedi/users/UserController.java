@@ -2,30 +2,51 @@ package hexfive.ismedi.users;
 
 
 import hexfive.ismedi.global.response.APIResponse;
-import io.swagger.v3.oas.annotations.Operation;
+import hexfive.ismedi.global.swagger.UserDocs;
+import hexfive.ismedi.users.dto.UpdateRequestDto;
+import hexfive.ismedi.users.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 @SecurityRequirement(name = "JWT")
-public class UserController {
+public class UserController implements UserDocs {
+    private final UserService userService;
 
-    @Operation(
-            summary = "토큰 정상 응답 테스트",
-            description = "Access Token을 헤더에 담아 전송했을 경우 정상응답 테스트하는 API입니다.",
-            security = @SecurityRequirement(name = "JWT")
-    )
-    @GetMapping("/test")
-    public ResponseEntity<?> test(){
+    @GetMapping("/{id}")
+    public APIResponse<UserResponseDto> getUserInfo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        return APIResponse.success(userService.getUserInfo(loginUserId, id));
+    }
 
-        return ResponseEntity.ok(APIResponse.success("test ok"));
+    @PatchMapping("/{id}")
+    public APIResponse<UserResponseDto> updateUserInfo(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRequestDto updateRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        return APIResponse.success(userService.updateUserInfo(loginUserId, id, updateRequestDto));
+    }
+
+    @DeleteMapping("/{id}")
+    public APIResponse<?> deleteUserInfo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ){
+        Long loginUserId = Long.parseLong(userDetails.getUsername());
+        userService.deleteUserInfo(loginUserId, id);
+        return APIResponse.success(null);
     }
 }

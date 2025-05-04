@@ -14,7 +14,16 @@ import org.springframework.web.servlet.view.RedirectView;
 
 public interface AuthDocs {
 
-    @Operation(summary = "웹 카카오 로그인 요청", description = "카카오 인증 서버로 리다이렉트합니다.")
+    @Operation(
+            summary = "웹 카카오 로그인 요청",
+            description = "카카오 인증 서버로 리다이렉트합니다. Swagger는 응답이 JSON이거나 API 응답이라는 기본 전제가 깔려있어서 HTTP 302 Redirect는 에러 처리합니다.",
+            responses = {
+                @ApiResponse(
+                        responseCode = "302",
+                        description = "리다이렉트 URL로 이동합니다."
+                )
+            }
+    )
     @GetMapping("/login")
     RedirectView kakaoLogin();
 

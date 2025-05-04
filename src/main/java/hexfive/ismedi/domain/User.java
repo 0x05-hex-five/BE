@@ -50,4 +50,11 @@ public class User {
         WOMAN,
         MAN;
     }
+
+    public void updateUserInfo(Date birth, Gender gender, Boolean pregnant, Boolean alert) {
+        this.birth = birth;
+        this.gender = gender;
+        this.pregnant = pregnant;
+        this.alert = alert;
+    }
 }
