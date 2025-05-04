@@ -31,4 +31,9 @@ public interface FavoriteDocs {
             @PathVariable("medicine-id") Long medicineId,
             @Parameter(hidden = true) UserDetails userDetails
     );
+
+    @Operation(summary = "즐겨찾기 전체 삭제", description = "해당 사용자의 즐겨찾기 목록을 전부 삭제합니다.")
+    APIResponse<String> deleteAllFavorites(
+            @Parameter(hidden = true) UserDetails userDetails
+    );
 }

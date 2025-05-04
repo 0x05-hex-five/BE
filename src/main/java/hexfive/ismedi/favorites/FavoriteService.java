@@ -59,4 +59,13 @@ public class FavoriteService {
                 .orElseThrow(() -> new CustomException(FAVORITE_NOT_FOUND));
         favoriteRepository.delete(favorite);
     }
+
+    @Transactional
+    public void removeAllFavorites(Long userId){
+        List<Favorite> favorites = favoriteRepository.findByUserId(userId);
+        if (favorites.isEmpty()) {
+            return;
+        }
+        favoriteRepository.deleteAll(favorites);
+    }
 }

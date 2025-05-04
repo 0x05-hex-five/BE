@@ -35,4 +35,11 @@ public class FavoriteController implements FavoriteDocs {
         favoriteService.removeFavorite(userId, medicineId);
         return APIResponse.success("즐겨찾기에서 삭제되었습니다.");
     }
+
+    @DeleteMapping
+    public APIResponse<String> deleteAllFavorites(@AuthenticationPrincipal UserDetails userDetails){
+        Long userId = Long.parseLong(userDetails.getUsername());
+        favoriteService.removeAllFavorites(userId);
+        return APIResponse.success("즐겨찾기 목록이 전부 삭제되었습니다.");
+    }
 }
