@@ -54,14 +54,14 @@ public class FavoriteService {
     }
 
     @Transactional
-    public void removeFavorite(Long userId, Long medicineId){
+    public void deleteFavorite(Long userId, Long medicineId){
         Favorite favorite = favoriteRepository.findByUserIdAndMedicineId(userId, medicineId)
                 .orElseThrow(() -> new CustomException(FAVORITE_NOT_FOUND));
         favoriteRepository.delete(favorite);
     }
 
     @Transactional
-    public void removeAllFavorites(Long userId){
+    public void deleteAllFavorites(Long userId){
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         if (favorites.isEmpty()) {
             return;

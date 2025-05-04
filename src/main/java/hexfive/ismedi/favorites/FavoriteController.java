@@ -32,14 +32,14 @@ public class FavoriteController implements FavoriteDocs {
     @DeleteMapping("/{medicine-id}")
     public APIResponse<String> deleteFavorites(@PathVariable("medicine-id") Long medicineId, @AuthenticationPrincipal UserDetails userDetails){
         Long userId = Long.parseLong(userDetails.getUsername());
-        favoriteService.removeFavorite(userId, medicineId);
+        favoriteService.deleteFavorite(userId, medicineId);
         return APIResponse.success("즐겨찾기에서 삭제되었습니다.");
     }
 
     @DeleteMapping
     public APIResponse<String> deleteAllFavorites(@AuthenticationPrincipal UserDetails userDetails){
         Long userId = Long.parseLong(userDetails.getUsername());
-        favoriteService.removeAllFavorites(userId);
+        favoriteService.deleteAllFavorites(userId);
         return APIResponse.success("즐겨찾기 목록이 전부 삭제되었습니다.");
     }
 }

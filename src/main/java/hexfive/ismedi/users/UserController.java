@@ -46,7 +46,7 @@ public class UserController implements UserDocs {
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
         userService.deleteUserInfo(loginUserId);
-        favoriteService.removeAllFavorites(loginUserId);
+        favoriteService.deleteAllFavorites(loginUserId);
         return APIResponse.success("회원 정보가 삭제되었습니다.");
     }
 }
