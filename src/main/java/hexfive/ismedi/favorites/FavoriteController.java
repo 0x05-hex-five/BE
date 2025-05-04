@@ -2,6 +2,7 @@ package hexfive.ismedi.favorites;
 
 import hexfive.ismedi.favorites.dto.ResFavoriteDto;
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.swagger.FavoriteDocs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor
-public class FavoriteController {
+public class FavoriteController implements FavoriteDocs {
     private final FavoriteService favoriteService;
 
     @PostMapping("/{medicine-id}")
