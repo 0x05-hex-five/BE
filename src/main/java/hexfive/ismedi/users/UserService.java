@@ -16,20 +16,14 @@ import static hexfive.ismedi.global.exception.ErrorCode.USER_NOT_FOUND;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserResponseDto getUserInfo(Long loginUserId, Long id){
-        if (!loginUserId.equals(id)) {
-            throw new CustomException(ACCESS_DENIED);
-        }
+    public UserResponseDto getUserInfo(Long id){
         return userRepository.findById(id)
                 .map(UserResponseDto::fromEntity)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     @Transactional
-    public UserResponseDto updateUserInfo(Long loginUserId, Long id, UpdateRequestDto updateRequestDto){
-        if (!loginUserId.equals(id)) {
-            throw new CustomException(ACCESS_DENIED);
-        }
+    public UserResponseDto updateUserInfo(Long id, UpdateRequestDto updateRequestDto){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         user.updateUserInfo(
@@ -42,10 +36,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserInfo(Long loginUserId, Long id){
-        if (!loginUserId.equals(id)) {
-            throw new CustomException(ACCESS_DENIED);
-        }
+    public void deleteUserInfo(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         userRepository.delete(user);

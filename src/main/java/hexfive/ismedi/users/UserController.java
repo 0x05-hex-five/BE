@@ -21,32 +21,29 @@ import org.springframework.web.bind.annotation.*;
 public class UserController implements UserDocs {
     private final UserService userService;
 
-    @GetMapping("/{id}")
+    @GetMapping
     public APIResponse<UserResponseDto> getUserInfo(
-            @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
-        return APIResponse.success(userService.getUserInfo(loginUserId, id));
+        return APIResponse.success(userService.getUserInfo(loginUserId));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping
     public APIResponse<UserResponseDto> updateUserInfo(
-            @PathVariable Long id,
             @Valid @RequestBody UpdateRequestDto updateRequestDto,
             @AuthenticationPrincipal UserDetails userDetails
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
-        return APIResponse.success(userService.updateUserInfo(loginUserId, id, updateRequestDto));
+        return APIResponse.success(userService.updateUserInfo(loginUserId, updateRequestDto));
     }
 
-    @DeleteMapping("/{id}")
-    public APIResponse<?> deleteUserInfo(
-            @PathVariable Long id,
+    @DeleteMapping
+    public APIResponse<String> deleteUserInfo(
             @AuthenticationPrincipal UserDetails userDetails
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
-        userService.deleteUserInfo(loginUserId, id);
-        return APIResponse.success(null);
+        userService.deleteUserInfo(loginUserId);
+        return APIResponse.success("회원 정보가 삭제되었습니다.");
     }
 }
