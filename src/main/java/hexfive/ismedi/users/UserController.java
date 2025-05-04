@@ -1,6 +1,7 @@
 package hexfive.ismedi.users;
 
 
+import hexfive.ismedi.favorites.FavoriteService;
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.swagger.UserDocs;
 import hexfive.ismedi.users.dto.UpdateRequestDto;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "JWT")
 public class UserController implements UserDocs {
     private final UserService userService;
+    private final FavoriteService favoriteService;
 
     @GetMapping
     public APIResponse<UserResponseDto> getUserInfo(
@@ -44,6 +46,7 @@ public class UserController implements UserDocs {
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
         userService.deleteUserInfo(loginUserId);
+        favoriteService.removeAllFavorites(loginUserId);
         return APIResponse.success("회원 정보가 삭제되었습니다.");
     }
 }
