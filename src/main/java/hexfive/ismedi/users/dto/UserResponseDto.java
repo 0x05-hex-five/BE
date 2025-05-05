@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -15,7 +16,7 @@ public class UserResponseDto {
     private Long id;
     private String name;
     private String email;
-    private Date birth;
+    private LocalDate birth;
     private String gender;
     private Boolean pregnant;
     private Boolean alert;

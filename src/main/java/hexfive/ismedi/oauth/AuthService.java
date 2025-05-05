@@ -7,6 +7,7 @@ import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.jwt.JwtProvider;
 import hexfive.ismedi.jwt.TokenDto;
 import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
+import hexfive.ismedi.oauth.dto.LoginRequestDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.oauth.dto.SignupResponseDto;
 import hexfive.ismedi.users.UserRepository;
@@ -31,7 +32,7 @@ import java.util.Optional;
 
 import static hexfive.ismedi.domain.User.Gender.MAN;
 import static hexfive.ismedi.domain.User.Gender.WOMAN;
-import static hexfive.ismedi.global.exception.ErrorCode.DUPLICATE_EMAIL;
+import static hexfive.ismedi.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -246,5 +247,38 @@ public class AuthService {
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(DUPLICATE_EMAIL);
         }
+    }
+
+    public KaKaoLoginResultDto isValidUser(LoginRequestDto loginRequestDto) {
+        User user = userRepository.findByEmail(loginRequestDto.getEmail())
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        // 로그인 실패
+        if (!user.getName().equals(loginRequestDto.getName())) {
+            throw new CustomException(LOGIN_FAILED);
+        }
+
+        // 로그인 성공시 토큰 발급
+        String accessToken = jwtProvider.generateAccessToken(user.getId());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .userId(user.getId())
+                .build();
+
+        KakaoUserInfoDto userInfo = KakaoUserInfoDto.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .gender(user.getGender())
+                .birthday(user.getBirth())
+                .build();
+
+        return KaKaoLoginResultDto.builder()
+                .isNew(false)
+                .userInfo(userInfo)
+                .token(tokenDto)
+                .build();
     }
 }

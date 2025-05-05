@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Getter
@@ -27,7 +28,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private Date birth;
+    private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -50,7 +51,7 @@ public class User {
         MAN;
     }
 
-    public void updateUserInfo(Date birth, Gender gender, Boolean pregnant, Boolean alert) {
+    public void updateUserInfo(LocalDate birth, Gender gender, Boolean pregnant, Boolean alert) {
         this.birth = birth;
         this.gender = gender;
         this.pregnant = pregnant;

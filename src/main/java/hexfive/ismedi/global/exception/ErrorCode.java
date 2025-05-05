@@ -14,6 +14,7 @@ public enum ErrorCode {
     LOGOUT_TOKEN("LOGOUT_TOKEN", "로그아웃된 토큰입니다", HttpStatus.UNAUTHORIZED),
     MISSING_TOKEN("MISSING_TOKEN", "Access Token이 없습니다", HttpStatus.UNAUTHORIZED),
     LOGOUT_FAILED("LOGOUT_FAILED", "로그아웃 처리 중 문제가 발생했습니다. 토큰이 이미 만료되었거나 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    LOGIN_FAILED("LOGIN_FAILED", "로그인 정보(이름, 이메일)가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "해당 데이터에 대한 접근 권한이 없습니다", HttpStatus.FORBIDDEN),
 
     // Redis 관련

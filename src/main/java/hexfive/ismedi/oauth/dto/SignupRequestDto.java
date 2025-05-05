@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -24,7 +25,7 @@ public class SignupRequestDto {
 
     @NotNull(message = "생년월일은 필수입니다.")
     @Schema(description = "생년월일", example = "2000-01-01")
-    private Date birth;
+    private LocalDate birth;
 
     @NotNull(message = "성별은 필수입니다.")
     @Schema(description = "성별 (WOMAN 또는 MAN)", example = "WOMAN")

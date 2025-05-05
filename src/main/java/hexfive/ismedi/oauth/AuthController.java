@@ -4,6 +4,7 @@ import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.global.swagger.AuthDocs;
 import hexfive.ismedi.jwt.TokenDto;
+import hexfive.ismedi.oauth.dto.LoginRequestDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
@@ -86,5 +87,10 @@ public class AuthController implements AuthDocs {
     public APIResponse<?> signup(@RequestBody @Valid SignupRequestDto request){
         Map<String, Object> result = authService.signup(request);
         return APIResponse.success(result);
+    }
+
+    @PostMapping("/medi-login")
+    public APIResponse<KaKaoLoginResultDto> mediLogin(@RequestBody LoginRequestDto loginRequestDto){
+        return APIResponse.success(authService.isValidUser(loginRequestDto));
     }
 }
