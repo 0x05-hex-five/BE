@@ -2,9 +2,6 @@ package hexfive.ismedi.global.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.ErrorResponse;
-
-import java.util.Map;
 
 @Getter
 public enum ErrorCode {
@@ -43,6 +40,13 @@ public enum ErrorCode {
 
     // Notification
     NOTIFICATION_NOT_FOUND("CATEGORY_NOT_FOUND", "알림(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+
+    // Favorite
+    FAVORITE_ALREADY_EXISTS("FAVORITE_ALREADY_EXISTS", "이미 즐겨찾기된 약입니다.", HttpStatus.CONFLICT),
+    FAVORITE_NOT_FOUND("FAVORITE_NOT_FOUND", "즐겨찾기 내역이 없습니다.", HttpStatus.NOT_FOUND),
+
+    // Medicine
+    MEDICINE_NOT_FOUND("MEDICINE_NOT_FOUND", "해당 약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 기타
     INTERNAL_ERROR("INTERNAL_ERROR", "서버 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);

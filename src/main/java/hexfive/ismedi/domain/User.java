@@ -1,5 +1,6 @@
 package hexfive.ismedi.domain;
 
+import hexfive.ismedi.favorites.Favorite;
 import hexfive.ismedi.notification.Notification;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
