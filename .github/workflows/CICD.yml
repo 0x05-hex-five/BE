@@ -83,6 +83,15 @@ jobs:
           source: config/application.properties
           target: ~/ismedi/
 
+      - name: firebaseKey.json 업로드
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: config/firebaseKey.json
+          target: ~/ismedi/
+
       - name: 배포 스크립트 실행
         uses: appleboy/ssh-action@v0.1.10
         with:
