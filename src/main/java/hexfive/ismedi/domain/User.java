@@ -47,9 +47,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Notification> notifications;
 
-    @Column(nullable = true)
-    private String fcmToken;
-
     public enum Gender {
         WOMAN,
         MAN;
@@ -60,9 +57,5 @@ public class User {
         this.gender = gender;
         this.pregnant = pregnant;
         this.alert = alert;
-    }
-
-    public void setFCMToken(String token) {
-        this.fcmToken = token;
     }
 }

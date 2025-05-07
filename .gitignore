@@ -40,4 +40,3 @@ out/
 ### Secret Properties ###
 *.properties
 !gradle/wrapper/gradle-wrapper.properties
-firebaseKye.json

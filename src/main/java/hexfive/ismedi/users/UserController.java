@@ -3,7 +3,6 @@ package hexfive.ismedi.users;
 
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.swagger.UserDocs;
-import hexfive.ismedi.users.dto.FCMTokenRequestDto;
 import hexfive.ismedi.users.dto.UpdateRequestDto;
 import hexfive.ismedi.users.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -48,16 +47,6 @@ public class UserController implements UserDocs {
     ){
         Long loginUserId = Long.parseLong(userDetails.getUsername());
         userService.deleteUserInfo(loginUserId, id);
-        return APIResponse.success(null);
-    }
-
-    @PostMapping("/fcm-token")
-    public APIResponse<Void> getToken(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody FCMTokenRequestDto fcmtokenRequestDto
-    ){
-        Long userId = Long.parseLong(userDetails.getUsername());
-        userService.getFCMToken(userId, fcmtokenRequestDto);
         return APIResponse.success(null);
     }
 }

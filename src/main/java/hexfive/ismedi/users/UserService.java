@@ -2,7 +2,6 @@ package hexfive.ismedi.users;
 
 import hexfive.ismedi.domain.User;
 import hexfive.ismedi.global.exception.CustomException;
-import hexfive.ismedi.users.dto.FCMTokenRequestDto;
 import hexfive.ismedi.users.dto.UpdateRequestDto;
 import hexfive.ismedi.users.dto.UserResponseDto;
 import jakarta.transaction.Transactional;
@@ -50,12 +49,5 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         userRepository.delete(user);
-    }
-
-    public void getFCMToken(Long userId, FCMTokenRequestDto fcmTokenRequestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-        user.setFCMToken(fcmTokenRequestDto.getFcmToken());
-        userRepository.save(user);
     }
 }
