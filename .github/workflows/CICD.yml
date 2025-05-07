@@ -39,6 +39,10 @@ jobs:
           mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
+      - name: firebaseKey.json 생성
+        run: |
+          echo "${{ secrets.FIREBASE_KEY_CONTENT }}" > ./config/firebaseKey.json
+
       - name: .env 생성
         run: |
           echo "${{ secrets.DOCKER_ENV }}" > ./.env
