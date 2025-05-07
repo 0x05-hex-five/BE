@@ -1,6 +1,7 @@
 package hexfive.ismedi.global.swagger;
 
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.users.dto.FCMTokenRequestDto;
 import hexfive.ismedi.users.dto.UpdateRequestDto;
 import hexfive.ismedi.users.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,5 +53,20 @@ public interface UserDocs {
     APIResponse<?> deleteUserInfo(
             @Parameter(description = "삭제할 사용자 ID", example = "10") @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
+    );
+
+
+    @Operation(
+            summary = "FCM 토큰 등록",
+            description = "모바일 앱에서 발급된 FCM 토큰을 서버에 등록합니다. 이 토큰을 통해 서버가 푸시 알림을 전송할 수 있습니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "토큰 등록 성공"),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자 ID")
+    })
+    @PostMapping("/fcm-token")
+    APIResponse<Void> getToken(
+            @AuthenticationPrincipal @Parameter(hidden = true) UserDetails userDetails,
+            @RequestBody FCMTokenRequestDto fcmtokenRequestDto
     );
 }
