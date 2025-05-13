@@ -107,7 +107,7 @@ public class OpenAPIService {
         }
 
         URI uri = new URI(uriBuilder.toString());
-        log.info("uri: {}", uri);
+//        log.info("uri: {}", uri);
 
         RestTemplate template = new RestTemplate();
         String jsonResponse = template.getForObject(uri, String.class);
@@ -115,7 +115,7 @@ public class OpenAPIService {
         JavaType javaType = objectMapper.getTypeFactory()
                 .constructParametricType(OpenAPIResponse.class, apiType.getEntity());
 
-        log.info("{}", jsonResponse);
+//        log.info("{}", jsonResponse);
         return objectMapper.readValue(jsonResponse, javaType);
     }
 }

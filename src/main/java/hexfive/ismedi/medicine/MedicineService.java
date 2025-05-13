@@ -98,14 +98,11 @@ public class MedicineService {
         // medicine1의 병용 금지 약 목록 조회
         OpenAPIResponse<DURInteractionDto> response = openAPIService.fetch(APIType.DUR_INTERACTION, 1, params);
         List<DURInteractionDto> interactionsItems = response.getBody().getItems();
-        if (interactionsItems.size() != 0) {
-            checkList.add(medicine1.getId());
-            log.warn("{}", checkList);
-        }
 
         for (DURInteractionDto interactionItem : interactionsItems) {
+            log.info("{} {}", interactionItem.getMixtureItemSeq(), interactionItem.getItemName());
             // 동시 복용 불가능
-            if (interactionItem.getItemSeq().equals(medicine2.getItemSeq())) {
+            if (interactionItem.getMixtureItemSeq().equals(medicine2.getItemSeq())) {
                 return ResInteractionDto.builder()
                         .itemName1(medicine1.getItemName())
                         .itemName2(medicine2.getItemName())
