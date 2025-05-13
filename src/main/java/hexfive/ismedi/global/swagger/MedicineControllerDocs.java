@@ -1,6 +1,7 @@
 package hexfive.ismedi.global.swagger;
 
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.medicine.dto.ResInteractionDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,4 +40,12 @@ public interface MedicineControllerDocs {
             @Parameter(description = "의약품 ID", example = "1")
             @PathVariable Long id
     );
+
+    @GetMapping
+    @Operation(summary = "의약품 병용 금기 여부 조회", description = "두 의약품의 ID를 쿼리 파라미터로 입력받아 병용 금지 여부 정보를 반환합니다.")
+    APIResponse<ResInteractionDto> checkInteraction(
+            @Parameter(description = "첫 번째 약물 ID", example = "34472") @RequestParam Long id1,
+            @Parameter(description = "두 번째 약물 ID", example = "59054") @RequestParam Long id2
+    ) throws Exception;
+
 }
