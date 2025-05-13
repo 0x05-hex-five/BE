@@ -39,10 +39,6 @@ jobs:
           mkdir -p ./config
           echo "${{ secrets.APPLICATION_PROPERTIES_CONTENT }}" > ./config/application.properties
 
-      - name: firebaseKey.json 생성
-        run: |
-          echo "${{ secrets.FIREBASE_KEY_CONTENT }}" > ./config/firebaseKey.json
-
       - name: .env 생성
         run: |
           echo "${{ secrets.DOCKER_ENV }}" > ./.env
@@ -81,15 +77,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: config/application.properties
-          target: ~/ismedi/
-
-      - name: firebaseKey.json 업로드
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: config/firebaseKey.json
           target: ~/ismedi/
 
       - name: 배포 스크립트 실행
