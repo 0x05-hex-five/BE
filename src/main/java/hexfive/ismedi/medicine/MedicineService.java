@@ -96,8 +96,22 @@ public class MedicineService {
         params.put("itemSeq", medicine1.getItemSeq());
 
         // medicine1의 병용 금지 약 목록 조회
-        OpenAPIResponse<DURInteractionDto> response = openAPIService.fetch(APIType.DUR_INTERACTION, 1, params);
-        List<DURInteractionDto> interactionsItems = response.getBody().getItems();
+        int pageNo = 1;
+        int totalCount = 0;
+        int curCount = 0;
+        List<DURInteractionDto> interactionsItems = new ArrayList<>();
+        do {
+            OpenAPIResponse<DURInteractionDto> response = openAPIService.fetch(APIType.DUR_INTERACTION, pageNo, params);
+            List<DURInteractionDto> items = response.getBody().getItems();
+
+            if (totalCount == 0) {
+                totalCount = response.getBody().getTotalCount();
+            }
+
+            interactionsItems.addAll(items);
+            curCount += items.size();
+            pageNo++;
+        } while (curCount < totalCount);
 
         for (DURInteractionDto interactionItem : interactionsItems) {
             log.info("{} {}", interactionItem.getMixtureItemSeq(), interactionItem.getItemName());
