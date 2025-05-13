@@ -36,8 +36,11 @@ public class MedicineController implements MedicineControllerDocs {
         return APIResponse.success(medicineService.getMedicine(id));
     }
 
-    @GetMapping("/interactions/{id1}/{id2}")
-    public APIResponse<ResInteractionDto> checkInteraction(@PathVariable Long id1, @PathVariable Long id2) throws Exception {
+    @GetMapping("/interactions")
+    public APIResponse<ResInteractionDto> checkInteraction(
+            @RequestParam Long id1,
+            @RequestParam Long id2
+    ) throws Exception {
         return APIResponse.success(medicineService.checkInteraction(id1, id2));
     }
 }
