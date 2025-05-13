@@ -37,6 +37,7 @@ public enum ErrorCode {
 
     // Category
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "카테고리(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
+//    MEDICINE_NOT_FOUND("MEDICINE_NOT_FOUND", "약(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
 
     // Notification
     NOTIFICATION_NOT_FOUND("CATEGORY_NOT_FOUND", "알림(id=%d)를 찾을 수 없습니다", HttpStatus.NOT_FOUND),
