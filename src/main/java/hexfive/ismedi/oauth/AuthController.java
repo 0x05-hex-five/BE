@@ -2,9 +2,9 @@ package hexfive.ismedi.oauth;
 
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.exception.CustomException;
-import hexfive.ismedi.global.swagger.AuthControllerDocs;
+import hexfive.ismedi.global.swagger.AuthDocs;
 import hexfive.ismedi.jwt.TokenDto;
-import hexfive.ismedi.oauth.dto.KakaoUserInfoDto;
+import hexfive.ismedi.oauth.dto.LoginRequestDto;
 import hexfive.ismedi.oauth.dto.SignupRequestDto;
 import hexfive.ismedi.users.dto.KaKaoLoginResultDto;
 import io.jsonwebtoken.JwtException;
@@ -23,7 +23,7 @@ import static hexfive.ismedi.global.exception.ErrorCode.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController implements AuthControllerDocs {
+public class AuthController implements AuthDocs {
     private final AuthService authService;
 
     @Value("${kakao.client-id}")
@@ -87,5 +87,10 @@ public class AuthController implements AuthControllerDocs {
     public APIResponse<?> signup(@RequestBody @Valid SignupRequestDto request){
         Map<String, Object> result = authService.signup(request);
         return APIResponse.success(result);
+    }
+
+    @PostMapping("/medi-login")
+    public APIResponse<KaKaoLoginResultDto> mediLogin(@RequestBody LoginRequestDto loginRequestDto){
+        return APIResponse.success(authService.isValidUser(loginRequestDto));
     }
 }

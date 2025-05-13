@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-public interface MedicineControllerDocs {
+public interface MedicineDocs {
 
     @Operation(summary = "의약품 데이터 병합", description = "공공데이터 API에서 받아온 의약품 정보를 DB에 병합합니다.")
     @GetMapping("/init")

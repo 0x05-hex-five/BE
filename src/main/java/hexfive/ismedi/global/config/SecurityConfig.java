@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @SecurityScheme(
         name = "JWT",
@@ -29,29 +30,34 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 기본 인증과 csrf 비활성화
-        http.httpBasic(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
 
-        // 세션 사용 안 함
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // URI 별 접근 권한 설정
-        http.authorizeHttpRequests(auth -> auth
+        http
+//            .cors(cors -> cors.configurationSource(request -> {
+//                CorsConfiguration config = new CorsConfiguration();
+//                config.addAllowedOrigin("http://localhost:3000");     // 개발용
+//                //config.addAllowedOrigin("domain");                  // 배포용
+//                config.addAllowedMethod("OPTIONS", "GET", "POST", "PUT", "DELETE");
+//                config.addAllowedHeader("*");
+//                config.setAllowCredentials(true);                     // 프론트에서 쿠키 사용할 경우 열어둠
+//                config.setMaxAge(3600L);                              // preflight (OPTIONS 응답 결과) 캐싱 시간
+//                return config;
+//            }))
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers( // 인증 없이 허용할 URI
                         "/api/auth/**",
                         "/api/interactions/**",
                         "/api/medicines/**",
                         "/api/fetch/**",
-                        // Swagger 세팅
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**"
                 ).permitAll()
-                .anyRequest().authenticated() // 나머지는 인증 필요
-        ).addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
-        // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .anyRequest().authenticated())
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

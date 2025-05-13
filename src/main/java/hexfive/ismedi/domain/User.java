@@ -1,11 +1,14 @@
 package hexfive.ismedi.domain;
 
+import hexfive.ismedi.favorites.Favorite;
+import hexfive.ismedi.notification.Notification;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Getter
@@ -26,7 +29,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private Date birth;
+    private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -44,8 +47,22 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Notification> notifications;
 
+    @Column(nullable = true)
+    private String fcmToken;
+
     public enum Gender {
         WOMAN,
         MAN;
+    }
+
+    public void updateUserInfo(LocalDate birth, Gender gender, Boolean pregnant, Boolean alert) {
+        this.birth = birth;
+        this.gender = gender;
+        this.pregnant = pregnant;
+        this.alert = alert;
+    }
+
+    public void setFCMToken(String token) {
+        this.fcmToken = token;
     }
 }

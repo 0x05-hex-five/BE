@@ -33,6 +33,8 @@ services:
       - redis
     volumes:
       - ./config:/config
+    environment:
+      - TZ=Asia/Seoul
 
 volumes:
   db-data:
