@@ -1,7 +1,8 @@
 package hexfive.ismedi.medicine;
 
 import hexfive.ismedi.global.exception.CustomException;
-import hexfive.ismedi.global.exception.ErrorCode;
+import hexfive.ismedi.medicine.dto.DURInteractionDto;
+import hexfive.ismedi.medicine.dto.ResInteractionDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.APIType;
@@ -13,7 +14,6 @@ import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
