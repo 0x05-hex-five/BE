@@ -32,30 +32,32 @@ public class MedicineService {
     List<Long> checkList = new ArrayList<>();
 
     public void mergeToMedicineTable() {
-        List<DrugInfo> drugInfos = drugInfoRepository.findAll();
+        List<PrescriptionType> prescriptionTypes = prescriptionTypeRepository.findAll();
 
-        for (DrugInfo di : drugInfos) {
-            String itemSeq = di.getItemSeq();
-            Optional<PrescriptionType> optionalPresc = prescriptionTypeRepository.findByItemSeq(itemSeq);
+        for (PrescriptionType pt : prescriptionTypes) {
+            try {
+                String itemSeq = pt.getItemSeq();
+                DrugInfo di = drugInfoRepository.findByItemSeq(itemSeq).orElse(null);
 
-            optionalPresc.ifPresent(pt -> {
                 Medicine medicine = Medicine.builder()
                         .itemSeq(itemSeq)
                         .entpName(pt.getEntpName())
                         .itemName(pt.getItemName())
                         .etcOtcCodeName(pt.getEtcOtcCodeName())
                         .classNoName(pt.getClassNoName())
-                        .itemImage(di.getItemImage())
-                        .efcyQesitm(di.getEfcyQesitm())
-                        .useMethodQesitm(di.getUseMethodQesitm())
-                        .atpnQesitm(di.getAtpnQesitm())
-                        .intrcQesitm(di.getIntrcQesitm())
-                        .seQesitm(di.getSeQesitm())
-                        .depositMethodQesitm(di.getDepositMethodQesitm())
+                        .itemImage(di != null ? di.getItemImage() : null)
+                        .efcyQesitm(di != null ? di.getEfcyQesitm() : null)
+                        .useMethodQesitm(di != null ? di.getUseMethodQesitm() : null)
+                        .atpnQesitm(di != null ? di.getAtpnQesitm() : null)
+                        .intrcQesitm(di != null ? di.getIntrcQesitm() : null)
+                        .seQesitm(di != null ? di.getSeQesitm() : null)
+                        .depositMethodQesitm(di != null ? di.getDepositMethodQesitm() : null)
                         .build();
 
                 medicineRepository.save(medicine);
-            });
+            } catch (Exception e) {
+                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", pt.getItemSeq(), e.getMessage());
+            }
         }
     }
 
