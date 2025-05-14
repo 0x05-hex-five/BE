@@ -1,5 +1,7 @@
 package hexfive.ismedi.fastApi;
 
+import hexfive.ismedi.fastApi.dto.AiResponseDto;
+import hexfive.ismedi.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,16 +12,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import static hexfive.ismedi.global.exception.ErrorCode.INTERNAL_ERROR;
+
 @Service
 @RequiredArgsConstructor
 public class FastApiService {
-    public final String UPLOAD_DIR = "uploads/";
+    public final FastApiClient fastApiClient;
+    private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/"; // 톰캣 내장서버 기준 말고 현재 서버 기준으로
+
+    public AiResponseDto recognize(MultipartFile imageFile){
+        String path = saveImage(imageFile);
+        return sendToAiServer(Paths.get(path));
+    }
 
     public String saveImage(MultipartFile imageFile) {
         try{
             Path uploadDir = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadDir)) {
-                Files.createDirectory(uploadDir);
+                Files.createDirectories(uploadDir);
             }
 
             String imageName = imageFile.getOriginalFilename();
@@ -30,11 +40,18 @@ public class FastApiService {
 
             String savedFileName = UUID.randomUUID() + ext;
             Path filePath = uploadDir.resolve(savedFileName);
+            System.out.println("저장할 경로: " + filePath.toAbsolutePath());
+
             imageFile.transferTo(filePath.toFile());
 
             return filePath.toString();
         } catch (IOException e) {
-            throw new RuntimeException("이미지 저장 중 오류 발생", e);
+            e.printStackTrace();
+            throw new CustomException(INTERNAL_ERROR);
         }
+    }
+
+    public AiResponseDto sendToAiServer(Path imagePath) {
+        return fastApiClient.sendImage(imagePath);
     }
 }
