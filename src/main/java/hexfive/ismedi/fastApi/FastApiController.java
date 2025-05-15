@@ -2,6 +2,7 @@ package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.global.swagger.FastApiDocs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/ai")
-public class FastApiController {
+public class FastApiController implements FastApiDocs {
     private final FastApiService fastApiService;
 
     @PostMapping(value = "/recognitions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
