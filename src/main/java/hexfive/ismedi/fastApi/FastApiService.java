@@ -22,7 +22,15 @@ public class FastApiService {
 
     public AiResponseDto recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
-        return sendToAiServer(Paths.get(path));
+        Path imagePath = Paths.get(path);
+        try{
+            AiResponseDto response = sendToAiServer(imagePath);
+            deleteImage(imagePath);
+            return response;
+        } catch (Exception e){
+            try{deleteImage(imagePath);} catch(Exception ignore){}
+            throw new CustomException(INTERNAL_ERROR);
+        }
     }
 
     public String saveImage(MultipartFile imageFile) {
@@ -40,18 +48,20 @@ public class FastApiService {
 
             String savedFileName = UUID.randomUUID() + ext;
             Path filePath = uploadDir.resolve(savedFileName);
-            System.out.println("저장할 경로: " + filePath.toAbsolutePath());
 
             imageFile.transferTo(filePath.toFile());
 
             return filePath.toString();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new CustomException(INTERNAL_ERROR);
         }
     }
 
     public AiResponseDto sendToAiServer(Path imagePath) {
         return fastApiClient.sendImage(imagePath);
+    }
+
+    private void deleteImage(Path imagePath) throws IOException {
+        Files.deleteIfExists(imagePath);
     }
 }
