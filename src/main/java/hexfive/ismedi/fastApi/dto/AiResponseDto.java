@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AiResponseDto {
-    private String name;
+    private Long id;
     private double confidence;
 }
