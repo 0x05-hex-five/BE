@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 import static hexfive.ismedi.global.exception.ErrorCode.INTERNAL_ERROR;
@@ -20,11 +21,11 @@ public class FastApiService {
     public final FastApiClient fastApiClient;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/"; // 톰캣 내장서버 기준 말고 현재 서버 기준으로
 
-    public AiResponseDto recognize(MultipartFile imageFile){
+    public List<AiResponseDto> recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
         Path imagePath = Paths.get(path);
         try{
-            AiResponseDto response = sendToAiServer(imagePath);
+            List<AiResponseDto> response = sendToAiServer(imagePath);
             deleteImage(imagePath);
             return response;
         } catch (Exception e){
@@ -57,7 +58,7 @@ public class FastApiService {
         }
     }
 
-    public AiResponseDto sendToAiServer(Path imagePath) {
+    public List<AiResponseDto> sendToAiServer(Path imagePath) {
         return fastApiClient.sendImage(imagePath);
     }
 

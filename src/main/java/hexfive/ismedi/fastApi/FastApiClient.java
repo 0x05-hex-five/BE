@@ -2,6 +2,7 @@ package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -11,6 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class FastApiClient {
     @Value("${ai.server.url}")
     private String aiServerUrl;
 
-    public AiResponseDto sendImage(Path imagePath){
+    public List<AiResponseDto> sendImage(Path imagePath){
         FileSystemResource imageResource = new FileSystemResource(imagePath);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -31,10 +33,11 @@ public class FastApiClient {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         RestTemplate template = new RestTemplate();
-        ResponseEntity<AiResponseDto> response = template.postForEntity(
+        ResponseEntity<List<AiResponseDto>> response = template.exchange(
                 aiServerUrl + "/predict",
+                HttpMethod.POST,
                 requestEntity,
-                AiResponseDto.class
+                new ParameterizedTypeReference<List<AiResponseDto>>() {}
         );
         return response.getBody();
     }

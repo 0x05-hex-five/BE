@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "FastAPI", description = "AI 약 이미지 분석 API")
 public interface FastApiDocs {
 
@@ -16,7 +18,7 @@ public interface FastApiDocs {
             description = "이미지 파일을 업로드하면 AI 모델을 통해 약 이름 및 추론 결과를 반환합니다."
     )
     @PostMapping(value = "/api/ai/recognitions", consumes = "multipart/form-data")
-    APIResponse<AiResponseDto> recognition(
+    APIResponse<List<AiResponseDto>> recognition(
             @RequestParam("image") MultipartFile imageFile
     );
 }
