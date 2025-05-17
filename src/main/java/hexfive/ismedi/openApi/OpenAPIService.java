@@ -6,14 +6,19 @@ import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
+import hexfive.ismedi.openApi.data.xml.APIResponse;
+import hexfive.ismedi.openApi.data.xml.DrugItem;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +97,7 @@ public class OpenAPIService {
     // 공통 호출 로직
     public <T> OpenAPIResponse<T> fetch(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
         String apiUrl = apiType.getUrl();
-        String type = "json";
+        String type = "xml";
         StringBuilder uriBuilder = new StringBuilder();
         uriBuilder.append(apiUrl)
                 .append("?serviceKey=").append(serviceKey)
@@ -107,7 +112,7 @@ public class OpenAPIService {
         }
 
         URI uri = new URI(uriBuilder.toString());
-//        log.info("uri: {}", uri);
+        log.info("uri: {}", uri);
 
         RestTemplate template = new RestTemplate();
         String jsonResponse = template.getForObject(uri, String.class);
@@ -115,7 +120,43 @@ public class OpenAPIService {
         JavaType javaType = objectMapper.getTypeFactory()
                 .constructParametricType(OpenAPIResponse.class, apiType.getEntity());
 
-//        log.info("{}", jsonResponse);
+        log.info("{}", jsonResponse);
         return objectMapper.readValue(jsonResponse, javaType);
+    }
+
+    public APIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
+        String apiUrl = apiType.getUrl();
+        String type = "xml";  // XML을 요청한다고 명시
+        StringBuilder uriBuilder = new StringBuilder();
+        uriBuilder.append(apiUrl)
+                .append("?serviceKey=").append(serviceKey)
+                .append("&pageNo=").append(pageNo)
+                .append("&numOfRows=").append(3)
+                .append("&type=").append(type);
+
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                uriBuilder.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+            }
+        }
+
+        URI uri = new URI(uriBuilder.toString());
+        log.info("uri: {}", uri);
+
+        // XML을 문자열로 받기
+        RestTemplate template = new RestTemplate();
+        String xmlResponse = template.getForObject(uri, String.class);
+        log.info("xmlResponse: {}", xmlResponse);
+
+        // JAXBContext를 이용한 XML 파싱
+        JAXBContext jaxbContext = JAXBContext.newInstance(APIResponse.class, apiType.getEntity());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        // XML 문자열 -> OpenAPIResponse 객체
+        StringReader reader = new StringReader(xmlResponse);
+        @SuppressWarnings("unchecked")
+        APIResponse result = (APIResponse) unmarshaller.unmarshal(reader);
+
+        return result;
     }
 }

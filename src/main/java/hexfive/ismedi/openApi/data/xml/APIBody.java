@@ -1,16 +1,16 @@
-package hexfive.ismedi.openApi.dto;
+package hexfive.ismedi.openApi.data.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
 import lombok.Getter;
 
-import java.util.Collections;
 import java.util.List;
 
 @Getter
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OpenAPIBody<T> {
+public class APIBody {
     @XmlElement
     private int pageNo;
 
@@ -20,10 +20,7 @@ public class OpenAPIBody<T> {
     @XmlElement
     private int numOfRows;
 
-    @XmlElement
-    private List<T> items;
-
-    public List<T> getItems() {
-        return items != null ? items : Collections.emptyList();
-    }
+    @XmlElementWrapper(name = "items")
+    @XmlElement(name = "item")
+    private List<DrugItem> items;
 }

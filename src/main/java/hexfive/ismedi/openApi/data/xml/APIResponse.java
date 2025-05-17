@@ -1,4 +1,4 @@
-package hexfive.ismedi.openApi.dto;
+package hexfive.ismedi.openApi.data.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -10,10 +10,10 @@ import lombok.Getter;
 @XmlRootElement(name = "response")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
-public class OpenAPIResponse<T> {
+public class APIResponse {
     @XmlElement(name = "header")
-    private OpenAPIHeader header;
+    private APIHeader header;
 
     @XmlElement(name = "body")
-    private OpenAPIBody<T> body;
+    private APIBody body;
 }

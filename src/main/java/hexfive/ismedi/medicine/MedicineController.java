@@ -5,9 +5,12 @@ import hexfive.ismedi.medicine.dto.ResInteractionDto;
 import hexfive.ismedi.global.swagger.MedicineDocs;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
+import hexfive.ismedi.openApi.APIType;
+import hexfive.ismedi.openApi.OpenAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -16,6 +19,7 @@ import java.util.List;
 public class MedicineController implements MedicineDocs {
 
     private final MedicineService medicineService;
+    private final OpenAPIService openAPIService;
 
     @GetMapping("/init")
     public void mergeMedicineData() {
@@ -42,5 +46,14 @@ public class MedicineController implements MedicineDocs {
             @RequestParam Long id2
     ) throws Exception {
         return APIResponse.success(medicineService.checkInteraction(id1, id2));
+    }
+
+    @GetMapping("/test")
+    public APIResponse<Object> test() {
+        try {
+            return APIResponse.success(openAPIService.fetchXML(APIType.XML, 1, new HashMap<>()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -3,6 +3,7 @@ package hexfive.ismedi.openApi;
 import hexfive.ismedi.medicine.dto.DURInteractionDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
+import hexfive.ismedi.openApi.data.xml.DrugItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,6 +26,12 @@ public enum APIType {
             "http://apis.data.go.kr/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03",
             "dur-interaction",
             DURInteractionDto.class
+    ),
+
+    XML(
+            "https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService06/getDrugPrdtPrmsnDtlInq05",
+            "xml",
+            DrugItem.class
     );
     private final String url;
     private final String typeName;
