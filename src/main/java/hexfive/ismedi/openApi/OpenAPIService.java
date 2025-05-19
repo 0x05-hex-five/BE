@@ -6,7 +6,10 @@ import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
-import hexfive.ismedi.openApi.data.xml.dto.APIResponse;
+import hexfive.ismedi.openApi.data.xml.XMLDrugInfoRepository;
+import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
+import hexfive.ismedi.openApi.data.xml.dto.DrugItem;
+import hexfive.ismedi.openApi.data.xml.dto.XMLAPIResponse;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
 import jakarta.xml.bind.JAXBContext;
@@ -19,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ import static hexfive.ismedi.global.exception.ErrorCode.*;
 public class OpenAPIService {
     private final DrugInfoRepository drugInfoRepository;
     private final PrescriptionTypeRepository prescriptionTypeRepository;
+    private final XMLDrugInfoRepository xmlDrugInfoRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api.key}")
@@ -123,14 +128,62 @@ public class OpenAPIService {
         return objectMapper.readValue(jsonResponse, javaType);
     }
 
-    public APIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
+    public void fetchXMLAll(APIType apiType) throws Exception {
+        int pageNo = 1;
+        int totalCount;
+        int totalSaved = 0;
+        int totalSkipped = 0;
+
+        do {
+            PageResult result = switch (apiType) {
+                case XML -> fetchXMLPage(apiType, pageNo);
+                default -> throw new IllegalStateException("지원하지 않는 API type입니다: " + apiType);
+            };
+
+            totalCount = result.totalCount();
+            totalSaved += result.saved();
+            totalSkipped += result.skipped();
+
+            pageNo++;
+        } while ((pageNo - 1) * MAX_ROW_CNT < totalCount); // MAX_ROW_CNT는 페이지당 최대 개수
+
+        log.info("XML 저장 완료 - 총 저장: {}, 총 스킵: {}", totalSaved, totalSkipped);
+
+        if (totalSaved + totalSkipped != totalCount) {
+            throw new CustomException(MISMATCH_COUNT, totalSaved, totalSkipped, totalCount);
+        }
+    }
+
+    public PageResult fetchXMLPage(APIType apiType, int pageNo) throws Exception {
+        XMLAPIResponse response = fetchXML(apiType, pageNo, new HashMap<>());
+        List<DrugItem> items = response.getBody().getItems();
+
+        if (items == null || items.isEmpty()) {
+            return new PageResult(0, 0, response.getBody().getTotalCount());
+        }
+
+        List<XmlDrugInfo> xmlDrugInfos = items.stream()
+                .map(XmlDrugInfo::from)
+                .toList();
+
+        List<XmlDrugInfo> toSave = xmlDrugInfos.stream()
+                .filter(item -> !xmlDrugInfoRepository.existsById(item.getItemSeq()))
+                .toList();
+
+        xmlDrugInfoRepository.saveAll(toSave);
+        log.info("[XML {}페이지] 저장: {} / 스킵: {}", pageNo, toSave.size(), xmlDrugInfos.size() - toSave.size());
+
+        return new PageResult(toSave.size(), xmlDrugInfos.size() - toSave.size(), response.getBody().getTotalCount());
+    }
+
+    public XMLAPIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
         String apiUrl = apiType.getUrl();
         String type = "xml";  // XML을 요청한다고 명시
         StringBuilder uriBuilder = new StringBuilder();
         uriBuilder.append(apiUrl)
                 .append("?serviceKey=").append(serviceKey)
                 .append("&pageNo=").append(pageNo)
-                .append("&numOfRows=").append(3)
+                .append("&numOfRows=").append(MAX_ROW_CNT)
                 .append("&type=").append(type);
 
         if (params != null) {
@@ -145,16 +198,15 @@ public class OpenAPIService {
         // XML을 문자열로 받기
         RestTemplate template = new RestTemplate();
         String xmlResponse = template.getForObject(uri, String.class);
-        log.info("xmlResponse: {}", xmlResponse);
 
         // JAXBContext를 이용한 XML 파싱
-        JAXBContext jaxbContext = JAXBContext.newInstance(APIResponse.class, apiType.getEntity());
+        JAXBContext jaxbContext = JAXBContext.newInstance(XMLAPIResponse.class, apiType.getEntity());
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
         // XML 문자열 -> OpenAPIResponse 객체
         StringReader reader = new StringReader(xmlResponse);
         @SuppressWarnings("unchecked")
-        APIResponse result = (APIResponse) unmarshaller.unmarshal(reader);
+        XMLAPIResponse result = (XMLAPIResponse) unmarshaller.unmarshal(reader);
 
         return result;
     }

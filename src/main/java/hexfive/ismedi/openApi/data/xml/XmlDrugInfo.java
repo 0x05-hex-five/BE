@@ -3,6 +3,7 @@ package hexfive.ismedi.openApi.data.xml;
 import hexfive.ismedi.openApi.data.xml.dto.DocData;
 import hexfive.ismedi.openApi.data.xml.dto.DrugItem;
 import hexfive.ismedi.openApi.data.xml.dto.Paragraph;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
@@ -15,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-//@Entity
+@Entity
 @Getter
 @Builder
 @AllArgsConstructor
@@ -23,24 +24,34 @@ import java.util.stream.Collectors;
 @Slf4j
 public class XmlDrugInfo {
 
-//    @Id
+    @Id
     private String itemSeq;         // 품목 기준코드
     private String itemName;        // 품목명
     private String entpName;        // 업체명
     private String etcOtcCode;      // 전문일반
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String chart;           // 성상
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String materialName;    // 원료 성분
 
-//    @Lob
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String eeDocText;       // 효능효과
 
-//    @Lob
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String udDocText;       // 용법용량
 
-//    @Lob
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String nbDocText;       // 주의사항
 
     public static XmlDrugInfo from(DrugItem item) {
+        log.info(item.getItemSeq());
         XmlDrugInfo info = new XmlDrugInfo();
         info.itemSeq = item.getItemSeq();
         info.itemName = item.getItemName();
@@ -55,7 +66,6 @@ public class XmlDrugInfo {
     }
 
     private static String extractText(DocData docData) {
-        log.info(docData.toString());
         if (docData == null ||
                 docData.getDoc() == null ||
                 docData.getDoc().getSection() == null ||

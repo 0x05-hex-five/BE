@@ -10,7 +10,7 @@ import lombok.Getter;
 @XmlRootElement(name = "response")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
-public class APIResponse {
+public class XMLAPIResponse {
     @XmlElement(name = "header")
     private APIHeader header;
 
