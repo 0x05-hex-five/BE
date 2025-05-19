@@ -20,6 +20,8 @@ public enum ErrorCode {
     // 요청 오류 관련
     VALIDATION_FAILED("VALIDATION_FAILED", "요청값이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
     DUPLICATE_EMAIL("DUPLICATE_EMAIL", "이미 등록된 이메일입니다", HttpStatus.BAD_REQUEST),
+    MAX_FILE_SIZE_EXCEEDED("MAX_FILE_SIZE_EXCEEDED", "업로드 가능한 최대 파일 크기를 초과했습니다. (최대 5MB)", HttpStatus.BAD_REQUEST),
+
 
     // AI 관련
     AI_SERVER_ERROR("AI_SERVER_ERROR", "AI 서버와 통신할 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR),
