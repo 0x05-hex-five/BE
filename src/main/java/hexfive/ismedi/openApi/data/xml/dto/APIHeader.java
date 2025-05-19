@@ -1,4 +1,4 @@
-package hexfive.ismedi.openApi.data.xml;
+package hexfive.ismedi.openApi.data.xml.dto;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

@@ -1,10 +1,12 @@
-package hexfive.ismedi.openApi.data.xml;
+package hexfive.ismedi.openApi.data.xml.dto;
 
 import jakarta.xml.bind.annotation.*;
 import lombok.Getter;
+import lombok.ToString;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
+@ToString
 public class Paragraph {
     @XmlAttribute(name = "tagName")
     private String tagName;

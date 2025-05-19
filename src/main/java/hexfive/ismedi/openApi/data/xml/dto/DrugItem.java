@@ -1,12 +1,14 @@
-package hexfive.ismedi.openApi.data.xml;
+package hexfive.ismedi.openApi.data.xml.dto;
 
 import jakarta.xml.bind.annotation.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @XmlAccessorType(XmlAccessType.FIELD)
 @NoArgsConstructor
+@ToString
 public class DrugItem {
 
     @XmlElement(name = "ITEM_SEQ")

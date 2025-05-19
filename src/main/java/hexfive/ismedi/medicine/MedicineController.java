@@ -7,14 +7,18 @@ import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.APIType;
 import hexfive.ismedi.openApi.OpenAPIService;
+import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/medicines")
 public class MedicineController implements MedicineDocs {
 
@@ -51,7 +55,13 @@ public class MedicineController implements MedicineDocs {
     @GetMapping("/test")
     public APIResponse<Object> test() {
         try {
-            return APIResponse.success(openAPIService.fetchXML(APIType.XML, 1, new HashMap<>()));
+            hexfive.ismedi.openApi.data.xml.dto.APIResponse apiResponse = openAPIService.fetchXML(APIType.XML, 1, new HashMap<>());
+
+            List<XmlDrugInfo> drugInfos = apiResponse.getBody().getItems().stream()
+                    .map(XmlDrugInfo::from)
+                    .collect(Collectors.toList());
+
+            return APIResponse.success(drugInfos);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

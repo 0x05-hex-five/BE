@@ -3,7 +3,7 @@ package hexfive.ismedi.openApi;
 import hexfive.ismedi.medicine.dto.DURInteractionDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
-import hexfive.ismedi.openApi.data.xml.DrugItem;
+import hexfive.ismedi.openApi.data.xml.dto.DrugItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
