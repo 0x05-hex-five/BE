@@ -3,6 +3,9 @@ package hexfive.ismedi.openApi;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexfive.ismedi.global.exception.CustomException;
+import hexfive.ismedi.medicine.Medicine;
+import hexfive.ismedi.medicine.MedicineType;
+import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
@@ -128,7 +131,7 @@ public class OpenAPIService {
         return objectMapper.readValue(jsonResponse, javaType);
     }
 
-    public void fetchXMLAll(APIType apiType) throws Exception {
+    public void fetchXMLAll(APIType apiType) {
         int pageNo = 1;
         int totalCount;
         int totalSaved = 0;
@@ -154,7 +157,7 @@ public class OpenAPIService {
         }
     }
 
-    public PageResult fetchXMLPage(APIType apiType, int pageNo) throws Exception {
+    public PageResult fetchXMLPage(APIType apiType, int pageNo) {
         XMLAPIResponse response = fetchXML(apiType, pageNo, new HashMap<>());
         List<DrugItem> items = response.getBody().getItems();
 
@@ -167,16 +170,21 @@ public class OpenAPIService {
                 .toList();
 
         List<XmlDrugInfo> toSave = xmlDrugInfos.stream()
-                .filter(item -> !xmlDrugInfoRepository.existsById(item.getItemSeq()))
+                .filter(item -> !xmlDrugInfoRepository.existsByItemSeq(item.getItemSeq()))
                 .toList();
 
-        xmlDrugInfoRepository.saveAll(toSave);
+        try {
+            xmlDrugInfoRepository.saveAll(toSave);
+
+        } catch (Exception e) {
+            log.warn("데이터 저장 실패 [page: {}] - {}", pageNo, e.getMessage());
+        }
         log.info("[XML {}페이지] 저장: {} / 스킵: {}", pageNo, toSave.size(), xmlDrugInfos.size() - toSave.size());
 
         return new PageResult(toSave.size(), xmlDrugInfos.size() - toSave.size(), response.getBody().getTotalCount());
     }
 
-    public XMLAPIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
+    public XMLAPIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) {
         String apiUrl = apiType.getUrl();
         String type = "xml";  // XML을 요청한다고 명시
         StringBuilder uriBuilder = new StringBuilder();
@@ -192,22 +200,42 @@ public class OpenAPIService {
             }
         }
 
-        URI uri = new URI(uriBuilder.toString());
-        log.info("uri: {}", uri);
+        try {
+            URI uri = new URI(uriBuilder.toString());
+            log.info("uri: {}", uri);
 
-        // XML을 문자열로 받기
-        RestTemplate template = new RestTemplate();
-        String xmlResponse = template.getForObject(uri, String.class);
+            // XML을 문자열로 받기
+            RestTemplate template = new RestTemplate();
+            String xmlResponse = template.getForObject(uri, String.class);
 
-        // JAXBContext를 이용한 XML 파싱
-        JAXBContext jaxbContext = JAXBContext.newInstance(XMLAPIResponse.class, apiType.getEntity());
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            // JAXBContext를 이용한 XML 파싱
+            JAXBContext jaxbContext = JAXBContext.newInstance(XMLAPIResponse.class, apiType.getEntity());
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-        // XML 문자열 -> OpenAPIResponse 객체
-        StringReader reader = new StringReader(xmlResponse);
-        @SuppressWarnings("unchecked")
-        XMLAPIResponse result = (XMLAPIResponse) unmarshaller.unmarshal(reader);
+            // XML 문자열 -> OpenAPIResponse 객체
+            StringReader reader = new StringReader(xmlResponse);
+            @SuppressWarnings("unchecked")
+            XMLAPIResponse result = (XMLAPIResponse) unmarshaller.unmarshal(reader);
+            return result;
+        } catch (Exception e) {
+            log.warn("API 호출 실패 : {}", pageNo);
+        }
+        return null;
+    }
 
-        return result;
+
+    public List<XmlDrugInfo> getNewMedicines(String name, MedicineType type) {
+        List<XmlDrugInfo> medicines;
+        if (type.isAll() && name.isBlank()) {
+            medicines = xmlDrugInfoRepository.findAll();
+        } else if (type.isAll()) {
+            medicines = xmlDrugInfoRepository.findAllByItemNameContaining(name);
+        } else if (name.isBlank()) {
+            medicines = xmlDrugInfoRepository.findAllByEtcOtcCode(type.getValue());
+        } else {
+            medicines = xmlDrugInfoRepository.findAllByItemNameContainingAndEtcOtcCode(name, type.getValue());
+        }
+
+        return medicines;
     }
 }

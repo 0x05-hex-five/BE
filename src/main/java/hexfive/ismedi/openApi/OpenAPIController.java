@@ -2,13 +2,12 @@ package hexfive.ismedi.openApi;
 
 import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.medicine.MedicineType;
+import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
 import hexfive.ismedi.openApi.data.xml.dto.XMLAPIResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +39,15 @@ public class OpenAPIController {
 
     @GetMapping("/xml")
     public void test() {
-        try {
-            openAPIService.fetchXMLAll(APIType.XML);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        openAPIService.fetchXMLAll(APIType.XML);
+    }
+
+    @GetMapping("/test")
+    public APIResponse<List<XmlDrugInfo>> searchNewMedicines(
+            @RequestParam(required = false, defaultValue = "") String name,    // 검색한 의약품명
+            @RequestParam(defaultValue = "ALL") String type              // 전문/일반 의약품
+    ) {
+        MedicineType medicineType = MedicineType.from(type);
+        return APIResponse.success(openAPIService.getNewMedicines(name, medicineType));
     }
 }

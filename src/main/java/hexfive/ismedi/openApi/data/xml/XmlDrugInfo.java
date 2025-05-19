@@ -3,15 +3,13 @@ package hexfive.ismedi.openApi.data.xml;
 import hexfive.ismedi.openApi.data.xml.dto.DocData;
 import hexfive.ismedi.openApi.data.xml.dto.DrugItem;
 import hexfive.ismedi.openApi.data.xml.dto.Paragraph;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,29 +23,33 @@ import java.util.stream.Collectors;
 public class XmlDrugInfo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Unique
     private String itemSeq;         // 품목 기준코드
     private String itemName;        // 품목명
     private String entpName;        // 업체명
     private String etcOtcCode;      // 전문일반
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String chart;           // 성상
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String materialName;    // 원료 성분
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String eeDocText;       // 효능효과
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String udDocText;       // 용법용량
 
     @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String nbDocText;       // 주의사항
 
     public static XmlDrugInfo from(DrugItem item) {
