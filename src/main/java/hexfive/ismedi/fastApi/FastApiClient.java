@@ -1,6 +1,9 @@
 package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
+import hexfive.ismedi.fastApi.dto.AiResponseWrapperDto;
+import hexfive.ismedi.global.exception.CustomException;
+import hexfive.ismedi.global.response.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -14,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.file.Path;
 import java.util.List;
 
+import static hexfive.ismedi.global.exception.ErrorCode.AI_SERVER_ERROR;
+
 @Component
 @RequiredArgsConstructor
 public class FastApiClient {
@@ -21,11 +26,11 @@ public class FastApiClient {
     @Value("${ai.server.url}")
     private String aiServerUrl;
 
-    public List<AiResponseDto> sendImage(Path imagePath){
+    public AiResponseDto sendImage(Path imagePath){
         FileSystemResource imageResource = new FileSystemResource(imagePath);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("image", imageResource); // FastAPI에서 image 파라미터로 받아야 함
+        body.add("file", imageResource);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -33,13 +38,26 @@ public class FastApiClient {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         RestTemplate template = new RestTemplate();
-        ResponseEntity<List<AiResponseDto>> response = template.exchange(
-                aiServerUrl + "/predict",
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<List<AiResponseDto>>() {}
-        );
-        return response.getBody();
+        try {
+            ResponseEntity<AiResponseWrapperDto> response = template.postForEntity(
+                    aiServerUrl + "/ai/predict",
+                    requestEntity,
+                    AiResponseWrapperDto.class
+            );
+
+            AiResponseWrapperDto responseBody = response.getBody();
+            if(responseBody == null || !responseBody.isStatus()){
+                throw new CustomException(AI_SERVER_ERROR);
+            }
+            if(!responseBody.isDetected() || responseBody.getData() == null){
+                return responseBody.getData();
+            }
+
+            return responseBody.getData();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new CustomException(AI_SERVER_ERROR);
+        }
     }
 
 }

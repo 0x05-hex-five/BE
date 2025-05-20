@@ -20,7 +20,7 @@ public class FastApiController implements FastApiDocs {
     private final FastApiService fastApiService;
 
     @PostMapping(value = "/recognitions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public APIResponse<List<AiResponseDto>> recognition(@RequestParam("image") MultipartFile imageFile) {
+    public APIResponse<AiResponseDto> recognition(@RequestParam("image") MultipartFile imageFile) {
         return APIResponse.success(fastApiService.recognize(imageFile));
     }
 }

@@ -21,11 +21,11 @@ public class FastApiService {
     public final FastApiClient fastApiClient;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/"; // 톰캣 내장서버 기준 말고 현재 서버 기준으로
 
-    public List<AiResponseDto> recognize(MultipartFile imageFile){
+    public AiResponseDto recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
         Path imagePath = Paths.get(path);
         try{
-            List<AiResponseDto> response = sendToAiServer(imagePath);
+            AiResponseDto response = sendToAiServer(imagePath);
             deleteImage(imagePath);
             return response;
         } catch (Exception e){
@@ -58,7 +58,7 @@ public class FastApiService {
         }
     }
 
-    public List<AiResponseDto> sendToAiServer(Path imagePath) {
+    public AiResponseDto sendToAiServer(Path imagePath) {
         return fastApiClient.sendImage(imagePath);
     }
 
