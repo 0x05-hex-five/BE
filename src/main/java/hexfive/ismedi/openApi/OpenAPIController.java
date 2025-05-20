@@ -21,12 +21,16 @@ import static hexfive.ismedi.global.exception.ErrorCode.INVALID_API_TYPE;
 public class OpenAPIController {
     private final OpenAPIService openAPIService;
 
-    @RequestMapping("/init")
-    public void fetchAll() throws Exception {
-        openAPIService.fetchAll(APIType.XML);
-        openAPIService.fetchAll(APIType.IMAGE_AND_CLASS);
-//        openAPIService.fetchAll(APIType.DRUG_INFO);
-//        openAPIService.fetchAll(APIType.PRESCRIPTION_TYPE);
+    @RequestMapping("/init/{type}")
+    public void fetchAll(@PathVariable String type) throws Exception {
+        APIType apiType = APIType.from(type); // 문자열 -> enum 변환
+        switch (apiType) {
+            case DRUG_INFO -> openAPIService.fetchAll(APIType.DRUG_INFO);
+            case PRESCRIPTION_TYPE -> openAPIService.fetchAll(APIType.PRESCRIPTION_TYPE);
+            case XML -> openAPIService.fetchAll(APIType.XML);
+            case IMAGE_AND_CLASS -> openAPIService.fetchAll(APIType.IMAGE_AND_CLASS);
+            default -> throw new CustomException(INVALID_API_TYPE, type);
+        }
     }
 
     @RequestMapping("/{type}/{pageNo}")
