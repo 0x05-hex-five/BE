@@ -6,6 +6,8 @@ import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.medicine.Medicine;
 import hexfive.ismedi.medicine.MedicineType;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClass;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClassRepository;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
@@ -39,6 +41,7 @@ public class OpenAPIService {
     private final DrugInfoRepository drugInfoRepository;
     private final PrescriptionTypeRepository prescriptionTypeRepository;
     private final XMLDrugInfoRepository xmlDrugInfoRepository;
+    private final ImageAndClassRepository imageAndClassRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${api.key}")
@@ -56,6 +59,7 @@ public class OpenAPIService {
             PageResult result = switch (apiType) {
                 case DRUG_INFO -> fetchDrugInfoPage(apiType, pageNo);
                 case PRESCRIPTION_TYPE -> fetchPrescriptionTypePage(apiType, pageNo);
+                case IMAGE_AND_CLASS -> fetchImageAndClassPage(apiType, pageNo);
                 default -> throw new IllegalStateException("지원하지 않는 API type입니다: " + apiType);
             };
 
@@ -101,10 +105,24 @@ public class OpenAPIService {
         return new PageResult(toSave.size(), items.size() - toSave.size(), response.getBody().getTotalCount());
     }
 
+    // 페이지별 수집 - IMAGE_AND_CLASS
+    public PageResult fetchImageAndClassPage(APIType apiType, int pageNo) throws Exception {
+        OpenAPIResponse<ImageAndClass> response = fetch(apiType, pageNo, null);
+        List<ImageAndClass> items = response.getBody().getItems();
+
+        List<ImageAndClass> toSave = items.stream()
+                .filter(item -> !imageAndClassRepository.existsByItemSeq(item.getItemSeq()))
+                .collect(Collectors.toList());
+
+        imageAndClassRepository.saveAll(toSave);
+        log.info("[{}페이지] 저장: {} / 스킵: {}", pageNo, toSave.size(), items.size() - toSave.size());
+        return new PageResult(toSave.size(), items.size() - toSave.size(), response.getBody().getTotalCount());
+    }
+
     // 공통 호출 로직
     public <T> OpenAPIResponse<T> fetch(APIType apiType, int pageNo, Map<String, String> params) throws Exception {
         String apiUrl = apiType.getUrl();
-        String type = "xml";
+        String type = "json";
         StringBuilder uriBuilder = new StringBuilder();
         uriBuilder.append(apiUrl)
                 .append("?serviceKey=").append(serviceKey)
@@ -119,7 +137,7 @@ public class OpenAPIService {
         }
 
         URI uri = new URI(uriBuilder.toString());
-        log.info("uri: {}", uri);
+//        log.info("uri: {}", uri);
 
         RestTemplate template = new RestTemplate();
         String jsonResponse = template.getForObject(uri, String.class);
@@ -127,7 +145,7 @@ public class OpenAPIService {
         JavaType javaType = objectMapper.getTypeFactory()
                 .constructParametricType(OpenAPIResponse.class, apiType.getEntity());
 
-        log.info("{}", jsonResponse);
+//        log.info("{}", jsonResponse);
         return objectMapper.readValue(jsonResponse, javaType);
     }
 

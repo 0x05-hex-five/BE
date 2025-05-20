@@ -23,8 +23,10 @@ public class OpenAPIController {
 
     @RequestMapping("/init")
     public void fetchAll() throws Exception {
-        openAPIService.fetchAll(APIType.DRUG_INFO);
-        openAPIService.fetchAll(APIType.PRESCRIPTION_TYPE);
+        openAPIService.fetchAll(APIType.XML);
+        openAPIService.fetchAll(APIType.IMAGE_AND_CLASS);
+//        openAPIService.fetchAll(APIType.DRUG_INFO);
+//        openAPIService.fetchAll(APIType.PRESCRIPTION_TYPE);
     }
 
     @RequestMapping("/{type}/{pageNo}")
@@ -35,19 +37,5 @@ public class OpenAPIController {
             case PRESCRIPTION_TYPE -> openAPIService.fetchPrescriptionTypePage(apiType, pageNo);
             default -> throw new CustomException(INVALID_API_TYPE, type);
         }
-    }
-
-    @GetMapping("/xml")
-    public void test() {
-        openAPIService.fetchXMLAll(APIType.XML);
-    }
-
-    @GetMapping("/test")
-    public APIResponse<List<XmlDrugInfo>> searchNewMedicines(
-            @RequestParam(required = false, defaultValue = "") String name,    // 검색한 의약품명
-            @RequestParam(defaultValue = "ALL") String type              // 전문/일반 의약품
-    ) {
-        MedicineType medicineType = MedicineType.from(type);
-        return APIResponse.success(openAPIService.getNewMedicines(name, medicineType));
     }
 }

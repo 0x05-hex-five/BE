@@ -8,6 +8,7 @@ import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.APIType;
 import hexfive.ismedi.openApi.OpenAPIService;
 import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClass;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClassRepository;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
@@ -30,6 +31,7 @@ import static hexfive.ismedi.global.exception.ErrorCode.MEDICINE_NOT_FOUND;
 public class MedicineService {
 
     private final XMLDrugInfoRepository xmlDrugInfoRepository;
+    private final ImageAndClassRepository imageAndClassRepository;
     private final MedicineRepository medicineRepository;
     private final OpenAPIService openAPIService;
     private final Set<String> requiredItemSeqs = Set.of(
@@ -47,20 +49,13 @@ public class MedicineService {
                 break;
 
             String itemSeq = drugInfo.getItemSeq();
+            if (requiredItemSeqs.contains(itemSeq)) {
+                log.info("{} : 제거,  남은 itemSeq : {} ", itemSeq, requiredItemSeqs.size());
+                requiredItemSeqs.remove(itemSeq);
+            }
+
             try {
-                Map<String, String> params = new HashMap<>();
-                params.put("itemSeq", drugInfo.getItemSeq());
-
-                // 이미지(itemImage)와 약 분류(className)를 받기위한 api호출
-                OpenAPIResponse<List<ImageAndClass>> response = openAPIService.fetch(APIType.IMAGE_AND_CLASS, 1, params);
-                Optional<ImageAndClass> maybeData = Optional.ofNullable(response)
-                        .map(OpenAPIResponse::getBody)
-                        .map(OpenAPIBody::getItems)
-                        .filter(list -> !list.isEmpty())
-                        .map(list -> (ImageAndClass) list.get(0));
-
-                String itemImage = maybeData.map(ImageAndClass::getItemImage).orElse(null);
-                String className = maybeData.map(ImageAndClass::getClassName).orElse(null);
+                Optional<ImageAndClass> imageAndClass = imageAndClassRepository.findById(itemSeq);
 
                 Medicine medicine = Medicine.builder()
                         .itemSeq(itemSeq)
@@ -72,8 +67,8 @@ public class MedicineService {
                         .eeDocText(drugInfo.getEeDocText())
                         .udDocText(drugInfo.getUdDocText())
                         .nbDocText(drugInfo.getNbDocText())
-                        .classNoName(className)
-                        .itemImage(itemImage)
+                        .classNoName(imageAndClass.map(ImageAndClass::getClassName).orElse(null))
+                        .itemImage(imageAndClass.map(ImageAndClass::getItemImage).orElse(null))
                         .build();
 
                 medicineRepository.save(medicine);

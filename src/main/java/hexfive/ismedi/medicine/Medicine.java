@@ -41,6 +41,7 @@ public class Medicine {
     private String nbDocText;       // 주의사항
 
 
+    // ImageAndClass
     private String itemImage; // 낱알이미지
 
     private String classNoName; // 약 정보
