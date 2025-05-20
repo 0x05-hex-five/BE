@@ -7,10 +7,14 @@ import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.APIType;
 import hexfive.ismedi.openApi.OpenAPIService;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClass;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
+import hexfive.ismedi.openApi.data.xml.XMLDrugInfoRepository;
+import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
+import hexfive.ismedi.openApi.dto.OpenAPIBody;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +29,56 @@ import static hexfive.ismedi.global.exception.ErrorCode.MEDICINE_NOT_FOUND;
 @Slf4j
 public class MedicineService {
 
-    private final PrescriptionTypeRepository prescriptionTypeRepository;
-    private final DrugInfoRepository drugInfoRepository;
+    private final XMLDrugInfoRepository xmlDrugInfoRepository;
     private final MedicineRepository medicineRepository;
     private final OpenAPIService openAPIService;
-    List<Long> checkList = new ArrayList<>();
+    private final Set<String> requiredItemSeqs = Set.of(
+            "12345678", "87654321", "ABC123"
+    );
+
+    public void initMedicineTable() {
+        List<XmlDrugInfo> drugInfos = xmlDrugInfoRepository.findAll();
+
+        for (XmlDrugInfo drugInfo : drugInfos) {
+            if (requiredItemSeqs.isEmpty())
+                break;
+
+            String itemSeq = drugInfo.getItemSeq();
+            try {
+                Map<String, String> params = new HashMap<>();
+                params.put("itemSeq", drugInfo.getItemSeq());
+
+                // 이미지(itemImage)와 약 분류(className)를 받기위한 api호출
+                OpenAPIResponse<List<ImageAndClass>> response = openAPIService.fetch(APIType.IMAGE_AND_CLASS, 1, params);
+                Optional<ImageAndClass> maybeData = Optional.ofNullable(response)
+                        .map(OpenAPIResponse::getBody)
+                        .map(OpenAPIBody::getItems)
+                        .filter(list -> !list.isEmpty())
+                        .map(list -> (ImageAndClass) list.get(0));
+
+                String itemImage = maybeData.map(ImageAndClass::getItemImage).orElse(null);
+                String className = maybeData.map(ImageAndClass::getClassName).orElse(null);
+
+                Medicine medicine = Medicine.builder()
+                        .itemSeq(itemSeq)
+                        .entpName(drugInfo.getEntpName())
+                        .itemName(drugInfo.getItemName())
+                        .etcOtcCode(drugInfo.getEtcOtcCode())
+                        .chart(drugInfo.getChart())
+                        .materialName(drugInfo.getMaterialName())
+                        .eeDocText(drugInfo.getEeDocText())
+                        .udDocText(drugInfo.getUdDocText())
+                        .nbDocText(drugInfo.getNbDocText())
+                        .classNoName(className)
+                        .itemImage(itemImage)
+                        .build();
+
+                medicineRepository.save(medicine);
+            } catch (Exception e) {
+                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", drugInfo.getItemSeq(), e.getMessage());
+            }
+        }
+    }
 
     public List<ResMedicineDto> getMedicines(String name, MedicineType type) {
         List<Medicine> medicines;
