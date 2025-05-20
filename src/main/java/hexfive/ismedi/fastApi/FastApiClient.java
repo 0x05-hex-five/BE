@@ -46,7 +46,7 @@ public class FastApiClient {
             );
 
             AiResponseWrapperDto responseBody = response.getBody();
-            if(responseBody == null || !responseBody.isStatus()){
+            if(responseBody == null || !responseBody.isSuccess()){
                 throw new CustomException(AI_SERVER_ERROR);
             }
 

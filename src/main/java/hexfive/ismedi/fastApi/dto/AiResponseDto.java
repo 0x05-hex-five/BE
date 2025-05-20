@@ -1,5 +1,6 @@
 package hexfive.ismedi.fastApi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 public class AiResponseDto {
     private List<Integer> box;
-    private Long top_class;
-    private double top_prob;
-    private List<AiClassProbDto> all_classes;
+
+    @JsonProperty("primary_prediction")
+    private AiClassProbDto primaryPrediction;
+
+    @JsonProperty("top_predictions")
+    private List<AiClassProbDto> topPredictions;
 }

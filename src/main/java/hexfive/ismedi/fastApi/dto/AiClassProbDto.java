@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AiClassProbDto {
-    @JsonProperty("class")
+    @JsonProperty("class_id")
     private Long classId;
 
-    private double prob;
+    private double confidence;
 }

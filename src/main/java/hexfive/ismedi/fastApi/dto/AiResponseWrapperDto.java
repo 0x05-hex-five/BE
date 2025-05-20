@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AiResponseWrapperDto {
-    private boolean status;
+    private boolean success;
     private boolean detected;
     private AiResponseDto data;  // null일 수 있음
 }
