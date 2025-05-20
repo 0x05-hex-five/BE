@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AiResponseDto {
     private List<Integer> box;
-    private String top_class;
+    private Long top_class;
     private double top_prob;
     private List<AiClassProbDto> all_classes;
 }
