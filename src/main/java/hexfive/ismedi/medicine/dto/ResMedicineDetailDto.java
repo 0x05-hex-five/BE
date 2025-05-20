@@ -17,26 +17,20 @@ public class ResMedicineDetailDto {
     private String type;            // 의약품 분류(전문/일반)
     private String className;       // 약 정보
 
-    private String efficacy;        // 효능
-    private String useMethod;       // 사용법
-    private String storageMethod;   // 보관법
+    private String efficacy;        // 효능효과
+    private String useMethod;       // 용법용량
     private String precaution;      // 주의사항
-    private String interaction;     // 상호작용
-    private String sideEffect;      // 부작용
 
     public static ResMedicineDetailDto fromEntity(Medicine medicine) {
         return ResMedicineDetailDto.builder()
                 .id(medicine.getId())
                 .name(medicine.getItemName())
                 .image(medicine.getItemImage())
-                .type(medicine.getEtcOtcCodeName())
+                .type(medicine.getEtcOtcCode())
                 .className(medicine.getClassNoName())
-                .efficacy(medicine.getEfcyQesitm())
-                .useMethod(medicine.getUseMethodQesitm())
-                .storageMethod(medicine.getDepositMethodQesitm())
-                .precaution(medicine.getAtpnQesitm())
-                .interaction(medicine.getIntrcQesitm())
-                .sideEffect(medicine.getSeQesitm())
+                .efficacy(medicine.getEeDocText())
+                .useMethod(medicine.getUdDocText())
+                .precaution(medicine.getNbDocText())
                 .build();
     }
 }

@@ -20,7 +20,7 @@ public class ResMedicineDto {
                 .id(medicine.getId())
                 .name(medicine.getItemName())
                 .image(medicine.getItemImage())
-                .type(medicine.getEtcOtcCodeName())
+                .type(medicine.getEtcOtcCode())
                 .className(medicine.getClassNoName())
                 .build();
     }

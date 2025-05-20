@@ -28,7 +28,7 @@ public class MedicineController implements MedicineDocs {
 
     @GetMapping("/init")
     public void mergeMedicineData() {
-        medicineService.mergeToMedicineTable();
+//        medicineService.mergeToMedicineTable();
     }
 
     @GetMapping("")

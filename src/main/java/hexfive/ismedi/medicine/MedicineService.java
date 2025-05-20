@@ -31,36 +31,6 @@ public class MedicineService {
     private final OpenAPIService openAPIService;
     List<Long> checkList = new ArrayList<>();
 
-    public void mergeToMedicineTable() {
-        List<PrescriptionType> prescriptionTypes = prescriptionTypeRepository.findAll();
-
-        for (PrescriptionType pt : prescriptionTypes) {
-            try {
-                String itemSeq = pt.getItemSeq();
-                DrugInfo di = drugInfoRepository.findByItemSeq(itemSeq).orElse(null);
-
-                Medicine medicine = Medicine.builder()
-                        .itemSeq(itemSeq)
-                        .entpName(pt.getEntpName())
-                        .itemName(pt.getItemName())
-                        .etcOtcCodeName(pt.getEtcOtcCodeName())
-                        .classNoName(pt.getClassNoName())
-                        .itemImage(di != null ? di.getItemImage() : null)
-                        .efcyQesitm(di != null ? di.getEfcyQesitm() : null)
-                        .useMethodQesitm(di != null ? di.getUseMethodQesitm() : null)
-                        .atpnQesitm(di != null ? di.getAtpnQesitm() : null)
-                        .intrcQesitm(di != null ? di.getIntrcQesitm() : null)
-                        .seQesitm(di != null ? di.getSeQesitm() : null)
-                        .depositMethodQesitm(di != null ? di.getDepositMethodQesitm() : null)
-                        .build();
-
-                medicineRepository.save(medicine);
-            } catch (Exception e) {
-                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", pt.getItemSeq(), e.getMessage());
-            }
-        }
-    }
-
     public List<ResMedicineDto> getMedicines(String name, MedicineType type) {
         List<Medicine> medicines;
         if (type.isAll() && name.isBlank()) {
@@ -68,9 +38,9 @@ public class MedicineService {
         } else if (type.isAll()) {
             medicines = medicineRepository.findAllByItemNameContaining(name);
         } else if (name.isBlank()) {
-            medicines = medicineRepository.findAllByEtcOtcCodeName(type.getValue());
+            medicines = medicineRepository.findAllByEtcOtcCode(type.getValue());
         } else {
-            medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCodeName(name, type.getValue());
+            medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCode(name, type.getValue());
         }
 
         for (Medicine medicine: medicines) {
