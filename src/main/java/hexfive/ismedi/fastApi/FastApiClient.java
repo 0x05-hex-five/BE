@@ -49,15 +49,10 @@ public class FastApiClient {
             if(responseBody == null || !responseBody.isStatus()){
                 throw new CustomException(AI_SERVER_ERROR);
             }
-            if(!responseBody.isDetected() || responseBody.getData() == null){
-                return responseBody.getData();
-            }
 
             return responseBody.getData();
         }catch (Exception e){
-            e.printStackTrace();
             throw new CustomException(AI_SERVER_ERROR);
         }
     }
-
 }
