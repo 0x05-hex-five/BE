@@ -5,21 +5,30 @@ import hexfive.ismedi.medicine.dto.ResInteractionDto;
 import hexfive.ismedi.global.swagger.MedicineDocs;
 import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
+import hexfive.ismedi.openApi.APIType;
+import hexfive.ismedi.openApi.OpenAPIService;
+import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
+import hexfive.ismedi.openApi.data.xml.dto.XMLAPIResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/medicines")
 public class MedicineController implements MedicineDocs {
 
     private final MedicineService medicineService;
+    private final OpenAPIService openAPIService;
 
     @GetMapping("/init")
     public void mergeMedicineData() {
-        medicineService.mergeToMedicineTable();
+        medicineService.initMedicineTable();
     }
 
     @GetMapping("")

@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     List<Medicine> findAllByItemNameContaining(String name);
-    List<Medicine> findAllByEtcOtcCodeName(String type);
-    List<Medicine> findAllByItemNameContainingAndEtcOtcCodeName(String name, String type);
+    List<Medicine> findAllByEtcOtcCode(String type);
+    List<Medicine> findAllByItemNameContainingAndEtcOtcCode(String name, String type);
 }
