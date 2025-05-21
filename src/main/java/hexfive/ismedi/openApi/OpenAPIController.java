@@ -39,6 +39,8 @@ public class OpenAPIController {
         switch (apiType) {
             case DRUG_INFO -> openAPIService.fetchDrugInfoPage(apiType, pageNo);
             case PRESCRIPTION_TYPE -> openAPIService.fetchPrescriptionTypePage(apiType, pageNo);
+            case XML -> openAPIService.fetchXMLPage(APIType.XML, pageNo);
+            case IMAGE_AND_CLASS -> openAPIService.fetchImageAndClassPage(APIType.IMAGE_AND_CLASS, pageNo);
             default -> throw new CustomException(INVALID_API_TYPE, type);
         }
     }
