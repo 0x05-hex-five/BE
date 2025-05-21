@@ -31,7 +31,7 @@ public enum APIType {
 
     XML(
             "https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService06/getDrugPrdtPrmsnDtlInq05",
-            "xml",
+            "XML",
             DrugItem.class
     ),
     IMAGE_AND_CLASS(
