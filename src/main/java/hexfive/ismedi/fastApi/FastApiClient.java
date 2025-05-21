@@ -2,8 +2,12 @@ package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
 import hexfive.ismedi.fastApi.dto.AiResponseWrapperDto;
+import hexfive.ismedi.fastApi.dto.ResAiMedicineDto;
 import hexfive.ismedi.global.exception.CustomException;
 import hexfive.ismedi.global.response.APIResponse;
+import hexfive.ismedi.medicine.MedicineService;
+import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
+import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -25,8 +29,9 @@ public class FastApiClient {
 
     @Value("${ai.server.url}")
     private String aiServerUrl;
+    private final MedicineService medicineService;
 
-    public AiResponseDto sendImage(Path imagePath){
+    public List<ResAiMedicineDto> sendImage(Path imagePath){
         FileSystemResource imageResource = new FileSystemResource(imagePath);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -50,7 +55,14 @@ public class FastApiClient {
                 throw new CustomException(AI_SERVER_ERROR);
             }
 
-            return responseBody.getData();
+           return responseBody.getData().getTopPredictions().stream()
+                    .map(prediction -> {
+                        Long id = prediction.getClassId();
+                        double confidence = prediction.getConfidence();
+                        ResMedicineDetailDto resMedicineDetailDto = medicineService.getMedicine(id);
+                        return ResAiMedicineDto.of(resMedicineDetailDto, confidence);
+                    })
+                    .toList();
         }catch (Exception e){
             throw new CustomException(AI_SERVER_ERROR);
         }

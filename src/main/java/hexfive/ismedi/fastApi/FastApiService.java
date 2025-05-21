@@ -1,6 +1,7 @@
 package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
+import hexfive.ismedi.fastApi.dto.ResAiMedicineDto;
 import hexfive.ismedi.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,11 @@ public class FastApiService {
     public final FastApiClient fastApiClient;
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/"; // 톰캣 내장서버 기준 말고 현재 서버 기준으로
 
-    public AiResponseDto recognize(MultipartFile imageFile){
+    public List<ResAiMedicineDto> recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
         Path imagePath = Paths.get(path);
         try{
-            AiResponseDto response = sendToAiServer(imagePath);
+            List<ResAiMedicineDto> response = sendToAiServer(imagePath);
             deleteImage(imagePath);
             return response;
         } catch (Exception e){
@@ -58,7 +59,7 @@ public class FastApiService {
         }
     }
 
-    public AiResponseDto sendToAiServer(Path imagePath) {
+    public List<ResAiMedicineDto> sendToAiServer(Path imagePath) {
         return fastApiClient.sendImage(imagePath);
     }
 

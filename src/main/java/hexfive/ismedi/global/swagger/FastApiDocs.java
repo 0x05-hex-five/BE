@@ -1,6 +1,7 @@
 package hexfive.ismedi.global.swagger;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
+import hexfive.ismedi.fastApi.dto.ResAiMedicineDto;
 import hexfive.ismedi.global.response.APIResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,7 +19,7 @@ public interface FastApiDocs {
             description = "이미지 파일을 업로드하면 AI 모델을 통해 약 이름 및 추론 결과를 반환합니다."
     )
     @PostMapping(value = "/api/ai/recognitions", consumes = "multipart/form-data")
-    APIResponse<AiResponseDto> recognition(
+    APIResponse<List<ResAiMedicineDto>> recognition(
             @RequestParam("image") MultipartFile imageFile
     );
 }
