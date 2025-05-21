@@ -7,10 +7,15 @@ import hexfive.ismedi.medicine.dto.ResMedicineDetailDto;
 import hexfive.ismedi.medicine.dto.ResMedicineDto;
 import hexfive.ismedi.openApi.APIType;
 import hexfive.ismedi.openApi.OpenAPIService;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClass;
+import hexfive.ismedi.openApi.data.ImageAndClass.ImageAndClassRepository;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfo;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionType;
 import hexfive.ismedi.openApi.data.drugInfo.DrugInfoRepository;
 import hexfive.ismedi.openApi.data.prescriptionType.PrescriptionTypeRepository;
+import hexfive.ismedi.openApi.data.xml.XMLDrugInfoRepository;
+import hexfive.ismedi.openApi.data.xml.XmlDrugInfo;
+import hexfive.ismedi.openApi.dto.OpenAPIBody;
 import hexfive.ismedi.openApi.dto.OpenAPIResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,38 +30,52 @@ import static hexfive.ismedi.global.exception.ErrorCode.MEDICINE_NOT_FOUND;
 @Slf4j
 public class MedicineService {
 
-    private final PrescriptionTypeRepository prescriptionTypeRepository;
-    private final DrugInfoRepository drugInfoRepository;
+    private final XMLDrugInfoRepository xmlDrugInfoRepository;
+    private final ImageAndClassRepository imageAndClassRepository;
     private final MedicineRepository medicineRepository;
     private final OpenAPIService openAPIService;
-    List<Long> checkList = new ArrayList<>();
+    private final Set<String> requiredItemSeqs = new HashSet<>(Set.of(
+            // AI
+            "197000040", "198100119", "198600312", "198900463", "199200588", "200000801", "199702182", "200000796", "200000797", "198500321", "199400492", "200300401", "200410085", "200410086", "200410090", "200511904", "200605262", "200605263", "200610660", "200500287", "200500288", "200101678", "200511057", "200511058", "200511059", "200210097", "200410326", "200511256", "200302297", "200403500", "200600026", "200606210", "200700907",
+            // DUR
+            "200500257", "201901612"
+    ));
 
-    public void mergeToMedicineTable() {
-        List<PrescriptionType> prescriptionTypes = prescriptionTypeRepository.findAll();
+    public void initMedicineTable() {
+        List<XmlDrugInfo> drugInfos = xmlDrugInfoRepository.findAll();
 
-        for (PrescriptionType pt : prescriptionTypes) {
+        for (XmlDrugInfo drugInfo : drugInfos) {
+            if (requiredItemSeqs.isEmpty())
+                break;
+
+            String itemSeq = drugInfo.getItemSeq();
+            Optional<ImageAndClass> imageAndClass = imageAndClassRepository.findById(itemSeq);
+
+            if (requiredItemSeqs.contains(itemSeq)) {
+                log.info("{} : 제거,  남은 itemSeq : {} ", itemSeq, requiredItemSeqs.size());
+                requiredItemSeqs.remove(itemSeq);
+            } else if (imageAndClass.isEmpty()) {
+                continue;
+            }
+
             try {
-                String itemSeq = pt.getItemSeq();
-                DrugInfo di = drugInfoRepository.findByItemSeq(itemSeq).orElse(null);
-
                 Medicine medicine = Medicine.builder()
                         .itemSeq(itemSeq)
-                        .entpName(pt.getEntpName())
-                        .itemName(pt.getItemName())
-                        .etcOtcCodeName(pt.getEtcOtcCodeName())
-                        .classNoName(pt.getClassNoName())
-                        .itemImage(di != null ? di.getItemImage() : null)
-                        .efcyQesitm(di != null ? di.getEfcyQesitm() : null)
-                        .useMethodQesitm(di != null ? di.getUseMethodQesitm() : null)
-                        .atpnQesitm(di != null ? di.getAtpnQesitm() : null)
-                        .intrcQesitm(di != null ? di.getIntrcQesitm() : null)
-                        .seQesitm(di != null ? di.getSeQesitm() : null)
-                        .depositMethodQesitm(di != null ? di.getDepositMethodQesitm() : null)
+                        .entpName(drugInfo.getEntpName())
+                        .itemName(drugInfo.getItemName())
+                        .etcOtcCode(drugInfo.getEtcOtcCode())
+                        .chart(drugInfo.getChart())
+                        .materialName(drugInfo.getMaterialName())
+                        .eeDocText(drugInfo.getEeDocText())
+                        .udDocText(drugInfo.getUdDocText())
+                        .nbDocText(drugInfo.getNbDocText())
+                        .classNoName(imageAndClass.map(ImageAndClass::getClassName).orElse(null))
+                        .itemImage(imageAndClass.map(ImageAndClass::getItemImage).orElse(null))
                         .build();
 
                 medicineRepository.save(medicine);
             } catch (Exception e) {
-                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", pt.getItemSeq(), e.getMessage());
+                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", drugInfo.getItemSeq(), e.getMessage());
             }
         }
     }
@@ -68,9 +87,9 @@ public class MedicineService {
         } else if (type.isAll()) {
             medicines = medicineRepository.findAllByItemNameContaining(name);
         } else if (name.isBlank()) {
-            medicines = medicineRepository.findAllByEtcOtcCodeName(type.getValue());
+            medicines = medicineRepository.findAllByEtcOtcCode(type.getValue());
         } else {
-            medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCodeName(name, type.getValue());
+            medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCode(name, type.getValue());
         }
 
         for (Medicine medicine: medicines) {

@@ -36,5 +36,12 @@ services:
     environment:
       - TZ=Asia/Seoul
 
+  ai-service:
+    image: danielee0404/ai-service:latest
+    volumes:
+      - ./weights:/app/weights
+    ports:
+      - "8000:8000"
+
 volumes:
   db-data:
