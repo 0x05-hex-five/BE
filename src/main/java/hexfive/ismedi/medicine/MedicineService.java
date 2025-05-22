@@ -34,50 +34,50 @@ public class MedicineService {
     private final ImageAndClassRepository imageAndClassRepository;
     private final MedicineRepository medicineRepository;
     private final OpenAPIService openAPIService;
-    private final Set<String> requiredItemSeqs = new HashSet<>(Set.of(
-            // AI
-            "197000040", "198100119", "198600312", "198900463", "199200588", "200000801", "199702182", "200000796", "200000797", "198500321", "199400492", "200300401", "200410085", "200410086", "200410090", "200511904", "200605262", "200605263", "200610660", "200500287", "200500288", "200101678", "200511057", "200511058", "200511059", "200210097", "200410326", "200511256", "200302297", "200403500", "200600026", "200606210", "200700907",
-            // DUR
-            "200500257", "201901612"
-    ));
+//    private final Set<String> requiredItemSeqs = new HashSet<>(Set.of(
+//            // AI
+//            "197000040", "198100119", "198600312", "198900463", "199200588", "200000801", "199702182", "200000796", "200000797", "198500321", "199400492", "200300401", "200410085", "200410086", "200410090", "200511904", "200605262", "200605263", "200610660", "200500287", "200500288", "200101678", "200511057", "200511058", "200511059", "200210097", "200410326", "200511256", "200302297", "200403500", "200600026", "200606210", "200700907",
+//            // DUR
+//            "200500257", "201901612"
+//    ));
 
     public void initMedicineTable() {
-        List<XmlDrugInfo> drugInfos = xmlDrugInfoRepository.findAll();
-
-        for (XmlDrugInfo drugInfo : drugInfos) {
-            if (requiredItemSeqs.isEmpty())
-                break;
-
-            String itemSeq = drugInfo.getItemSeq();
-            Optional<ImageAndClass> imageAndClass = imageAndClassRepository.findById(itemSeq);
-
-            if (requiredItemSeqs.contains(itemSeq)) {
-                log.info("{} : 제거,  남은 itemSeq : {} ", itemSeq, requiredItemSeqs.size());
-                requiredItemSeqs.remove(itemSeq);
-            } else if (imageAndClass.isEmpty()) {
-                continue;
-            }
-
-            try {
-                Medicine medicine = Medicine.builder()
-                        .itemSeq(itemSeq)
-                        .entpName(drugInfo.getEntpName())
-                        .itemName(drugInfo.getItemName())
-                        .etcOtcCode(drugInfo.getEtcOtcCode())
-                        .chart(drugInfo.getChart())
-                        .materialName(drugInfo.getMaterialName())
-                        .eeDocText(drugInfo.getEeDocText())
-                        .udDocText(drugInfo.getUdDocText())
-                        .nbDocText(drugInfo.getNbDocText())
-                        .classNoName(imageAndClass.map(ImageAndClass::getClassName).orElse(null))
-                        .itemImage(imageAndClass.map(ImageAndClass::getItemImage).orElse(null))
-                        .build();
-
-                medicineRepository.save(medicine);
-            } catch (Exception e) {
-                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", drugInfo.getItemSeq(), e.getMessage());
-            }
-        }
+//        List<XmlDrugInfo> drugInfos = xmlDrugInfoRepository.findAll();
+//
+//        for (XmlDrugInfo drugInfo : drugInfos) {
+//            if (requiredItemSeqs.isEmpty())
+//                break;
+//
+//            String itemSeq = drugInfo.getItemSeq();
+//            Optional<ImageAndClass> imageAndClass = imageAndClassRepository.findById(itemSeq);
+//
+//            if (requiredItemSeqs.contains(itemSeq)) {
+//                log.info("{} : 제거,  남은 itemSeq : {} ", itemSeq, requiredItemSeqs.size());
+//                requiredItemSeqs.remove(itemSeq);
+//            } else if (imageAndClass.isEmpty()) {
+//                continue;
+//            }
+//
+//            try {
+//                Medicine medicine = Medicine.builder()
+//                        .itemSeq(itemSeq)
+//                        .entpName(drugInfo.getEntpName())
+//                        .itemName(drugInfo.getItemName())
+//                        .etcOtcCode(drugInfo.getEtcOtcCode())
+//                        .chart(drugInfo.getChart())
+//                        .materialName(drugInfo.getMaterialName())
+//                        .eeDocText(drugInfo.getEeDocText())
+//                        .udDocText(drugInfo.getUdDocText())
+//                        .nbDocText(drugInfo.getNbDocText())
+//                        .classNoName(imageAndClass.map(ImageAndClass::getClassName).orElse(null))
+//                        .itemImage(imageAndClass.map(ImageAndClass::getItemImage).orElse(null))
+//                        .build();
+//
+//                medicineRepository.save(medicine);
+//            } catch (Exception e) {
+//                log.warn("itemSeq={} 약 데이터 저장 실패 : {}", drugInfo.getItemSeq(), e.getMessage());
+//            }
+//        }
     }
 
     public List<ResMedicineDto> getMedicines(String name, MedicineType type) {
