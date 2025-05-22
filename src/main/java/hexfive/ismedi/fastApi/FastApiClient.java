@@ -55,6 +55,10 @@ public class FastApiClient {
                 throw new CustomException(AI_SERVER_ERROR);
             }
 
+            if(responseBody.getData() == null){
+                return null;
+            }
+
            return responseBody.getData().getTopPredictions().stream()
                     .map(prediction -> {
                         Long id = prediction.getClassId();
