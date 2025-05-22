@@ -52,6 +52,7 @@ public class SecurityConfig {
                         "/api/medicines/**",
                         "/api/fetch/**",
                         "/swagger-ui/**",
+                        "/api/ai/recognitions",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**"
