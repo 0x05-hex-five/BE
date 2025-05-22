@@ -1,6 +1,7 @@
 package hexfive.ismedi.fastApi;
 
 import hexfive.ismedi.fastApi.dto.AiResponseDto;
+import hexfive.ismedi.fastApi.dto.ResAiMedicineDto;
 import hexfive.ismedi.global.response.APIResponse;
 import hexfive.ismedi.global.swagger.FastApiDocs;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class FastApiController implements FastApiDocs {
     private final FastApiService fastApiService;
 
     @PostMapping(value = "/recognitions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public APIResponse<List<AiResponseDto>> recognition(@RequestParam("image") MultipartFile imageFile) {
+    public APIResponse<List<ResAiMedicineDto>> recognition(@RequestParam("image") MultipartFile imageFile) {
         return APIResponse.success(fastApiService.recognize(imageFile));
     }
 }
