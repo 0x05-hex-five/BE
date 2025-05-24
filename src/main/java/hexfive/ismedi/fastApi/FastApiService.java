@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
-import static hexfive.ismedi.global.exception.ErrorCode.INTERNAL_ERROR;
+import static hexfive.ismedi.global.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +25,9 @@ public class FastApiService {
     public List<ResAiMedicineDto> recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
         Path imagePath = Paths.get(path);
-        try{
-            List<ResAiMedicineDto> response = sendToAiServer(imagePath);
-            deleteImage(imagePath);
-            return response;
-        } catch (Exception e){
-            try{deleteImage(imagePath);} catch(Exception ignore){}
-            throw new CustomException(INTERNAL_ERROR);
-        }
+        List<ResAiMedicineDto> response = sendToAiServer(imagePath);
+        deleteImage(imagePath);
+        return response;
     }
 
     public String saveImage(MultipartFile imageFile) {
@@ -55,7 +50,7 @@ public class FastApiService {
 
             return filePath.toString();
         } catch (IOException e) {
-            throw new CustomException(INTERNAL_ERROR);
+            throw new CustomException(FAIL_IMAGE_UPLOAD);
         }
     }
 
@@ -63,7 +58,12 @@ public class FastApiService {
         return fastApiClient.sendImage(imagePath);
     }
 
-    private void deleteImage(Path imagePath) throws IOException {
-        Files.deleteIfExists(imagePath);
+    private void deleteImage(Path imagePath) {
+
+        try {
+            Files.deleteIfExists(imagePath);
+        } catch (IOException e) {
+            throw new CustomException(FAIL_IMAGE_DELETE);
+        }
     }
 }

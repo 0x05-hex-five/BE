@@ -43,32 +43,28 @@ public class FastApiClient {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         RestTemplate template = new RestTemplate();
-        try {
-            ResponseEntity<AiResponseWrapperDto> response = template.postForEntity(
-                    aiServerUrl + "/ai/predict",
-                    requestEntity,
-                    AiResponseWrapperDto.class
-            );
+        ResponseEntity<AiResponseWrapperDto> response = template.postForEntity(
+                aiServerUrl + "/ai/predict",
+                requestEntity,
+                AiResponseWrapperDto.class
+        );
 
-            AiResponseWrapperDto responseBody = response.getBody();
-            if(responseBody == null || !responseBody.isSuccess()){
-                throw new CustomException(AI_SERVER_ERROR);
-            }
-
-            if(responseBody.getData() == null){
-                return null;
-            }
-
-           return responseBody.getData().getTopPredictions().stream()
-                    .map(prediction -> {
-                        Long id = prediction.getClassId();
-                        double confidence = prediction.getConfidence();
-                        ResMedicineDetailDto resMedicineDetailDto = medicineService.getMedicine(id);
-                        return ResAiMedicineDto.of(resMedicineDetailDto, confidence);
-                    })
-                    .toList();
-        }catch (Exception e){
+        AiResponseWrapperDto responseBody = response.getBody();
+        if(responseBody == null || !responseBody.isSuccess()){
             throw new CustomException(AI_SERVER_ERROR);
         }
+
+        if(responseBody.getData() == null){
+            return null;
+        }
+
+       return responseBody.getData().getTopPredictions().stream()
+                .map(prediction -> {
+                    Long id = prediction.getClassId();
+                    double confidence = prediction.getConfidence();
+                    ResMedicineDetailDto resMedicineDetailDto = medicineService.getMedicine(id);
+                    return ResAiMedicineDto.of(resMedicineDetailDto, confidence);
+                })
+                .toList();
     }
 }

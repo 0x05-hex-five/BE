@@ -92,10 +92,6 @@ public class MedicineService {
             medicines = medicineRepository.findAllByItemNameContainingAndEtcOtcCode(name, type.getValue());
         }
 
-        for (Medicine medicine: medicines) {
-            log.info("{}", medicine);
-        }
-
         return medicines.stream()
                 .map(ResMedicineDto::fromEntity)
                 .toList();
