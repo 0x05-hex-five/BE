@@ -52,7 +52,9 @@ public enum ErrorCode {
     MEDICINE_NOT_FOUND("MEDICINE_NOT_FOUND", "해당 약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 기타
-    INTERNAL_ERROR("INTERNAL_ERROR", "서버 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+    INTERNAL_ERROR("INTERNAL_ERROR", "서버 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_IMAGE_UPLOAD("INTERNAL_ERROR", "이미지 업로드 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+    FAIL_IMAGE_DELETE("INTERNAL_ERROR", "이미지 제거 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
     private final String message;

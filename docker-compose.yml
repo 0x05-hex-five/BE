@@ -39,9 +39,10 @@ services:
   ai-service:
     image: danielee0404/ai-service:latest
     volumes:
-      - ./weights:/app/weights
+      - ./embeddings:/app/embeddings:ro
     ports:
       - "8000:8000"
+    restart: on-failure
 
 volumes:
   db-data:
