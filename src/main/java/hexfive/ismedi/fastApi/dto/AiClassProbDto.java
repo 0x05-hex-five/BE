@@ -12,5 +12,6 @@ public class AiClassProbDto {
     @JsonProperty("class_id")
     private String classId;
 
+    @JsonProperty("similarity")
     private double confidence;
 }
