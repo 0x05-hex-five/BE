@@ -25,14 +25,9 @@ public class FastApiService {
     public List<ResAiMedicineDto> recognize(MultipartFile imageFile){
         String path = saveImage(imageFile);
         Path imagePath = Paths.get(path);
-        try{
             List<ResAiMedicineDto> response = sendToAiServer(imagePath);
             deleteImage(imagePath);
             return response;
-        } catch (Exception e){
-            try{deleteImage(imagePath);} catch(Exception ignore){}
-            throw new CustomException(INTERNAL_ERROR);
-        }
     }
 
     public String saveImage(MultipartFile imageFile) {
@@ -63,7 +58,11 @@ public class FastApiService {
         return fastApiClient.sendImage(imagePath);
     }
 
-    private void deleteImage(Path imagePath) throws IOException {
-        Files.deleteIfExists(imagePath);
+    private void deleteImage(Path imagePath) {
+        try {
+            Files.deleteIfExists(imagePath);
+        } catch (IOException e) {
+            throw new IllegalStateException("이미지 제거 실패");
+        }
     }
 }
