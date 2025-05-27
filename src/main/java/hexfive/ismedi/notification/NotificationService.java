@@ -121,7 +121,7 @@ public class NotificationService {
     @Scheduled(fixedRate = 60000) // 60,000ms = 1분
     public void sendScheduledNotifications() {
         LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0); // 초 단위는 무시한 현재 시간
-        log.info(String.valueOf(currentTime));
+//        log.info(String.valueOf(currentTime));
         List<Notification> notifications = notificationRepository.findByTime(currentTime);
         for (Notification notification : notifications) {
             sendNotification(notification);
