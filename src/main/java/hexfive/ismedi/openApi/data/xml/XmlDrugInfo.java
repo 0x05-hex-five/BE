@@ -53,7 +53,6 @@ public class XmlDrugInfo {
     private String nbDocText;       // 주의사항
 
     public static XmlDrugInfo from(DrugItem item) {
-        log.info(item.getItemSeq());
         XmlDrugInfo info = new XmlDrugInfo();
         info.itemSeq = item.getItemSeq();
         info.itemName = item.getItemName();
