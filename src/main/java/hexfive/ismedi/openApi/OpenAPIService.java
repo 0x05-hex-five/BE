@@ -162,6 +162,10 @@ public class OpenAPIService {
             };
 
             totalCount = result.totalCount();
+            if (totalCount == -1) {
+                pageNo++;
+                continue;
+            }
             totalSaved += result.saved();
             totalSkipped += result.skipped();
 
@@ -181,7 +185,7 @@ public class OpenAPIService {
             response = fetchXML(apiType, pageNo, new HashMap<>());
         } catch (Exception e) {
             log.warn("fetchXML 실패 [page: {}] - {}", pageNo, e.getMessage());
-            return new PageResult(0, 0, 0); // 실패 시 기본값 반환
+            return new PageResult(0, 0, -1);
         }
         List<DrugItem> items = response.getBody().getItems();
 
