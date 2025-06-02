@@ -176,7 +176,13 @@ public class OpenAPIService {
     }
 
     public PageResult fetchXMLPage(APIType apiType, int pageNo) {
-        XMLAPIResponse response = fetchXML(apiType, pageNo, new HashMap<>());
+        XMLAPIResponse response;
+        try {
+            response = fetchXML(apiType, pageNo, new HashMap<>());
+        } catch (Exception e) {
+            log.warn("fetchXML 실패 [page: {}] - {}", pageNo, e.getMessage());
+            return new PageResult(0, 0, 0); // 실패 시 기본값 반환
+        }
         List<DrugItem> items = response.getBody().getItems();
 
         if (items == null || items.isEmpty()) {
@@ -236,9 +242,8 @@ public class OpenAPIService {
             XMLAPIResponse result = (XMLAPIResponse) unmarshaller.unmarshal(reader);
             return result;
         } catch (Exception e) {
-            log.warn("API 호출 실패 : {}", pageNo);
+            throw new RuntimeException("API 호출 실패: pageNo=" + pageNo, e);
         }
-        return null;
     }
 
 
