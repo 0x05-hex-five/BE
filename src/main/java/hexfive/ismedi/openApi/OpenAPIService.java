@@ -193,13 +193,10 @@ public class OpenAPIService {
             return new PageResult(0, 0, response.getBody().getTotalCount());
         }
 
-        List<XmlDrugInfo> xmlDrugInfos = items.stream()
-                .map(XmlDrugInfo::from)
-                .toList();
-
-        List<XmlDrugInfo> toSave = xmlDrugInfos.stream()
-                .filter(item -> !xmlDrugInfoRepository.existsByItemSeq(item.getItemSeq()))
-                .toList();
+            List<XmlDrugInfo> toSave = items.stream()
+                    .map(XmlDrugInfo::from)
+                    .filter(item -> !xmlDrugInfoRepository.existsByItemSeq(item.getItemSeq()))
+                    .toList();
 
         try {
             xmlDrugInfoRepository.saveAll(toSave);
@@ -207,9 +204,10 @@ public class OpenAPIService {
         } catch (Exception e) {
             log.warn("데이터 저장 실패 [page: {}] - {}", pageNo, e.getMessage());
         }
-        log.info("[XML {}페이지] 저장: {} / 스킵: {}", pageNo, toSave.size(), xmlDrugInfos.size() - toSave.size());
+//        log.info("[XML {}페이지] 저장: {} / 스킵: {}", pageNo, toSave.size(), xmlDrugInfos.size() - toSave.size());
+        log.info("[XML {}페이지] 저장: {}", pageNo, toSave.size());
 
-        return new PageResult(toSave.size(), xmlDrugInfos.size() - toSave.size(), response.getBody().getTotalCount());
+        return new PageResult(toSave.size(), 0, response.getBody().getTotalCount());
     }
 
     public XMLAPIResponse fetchXML(APIType apiType, int pageNo, Map<String, String> params) {
