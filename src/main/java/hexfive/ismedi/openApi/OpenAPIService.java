@@ -46,7 +46,7 @@ public class OpenAPIService {
 
     @Value("${api.key}")
     private String serviceKey;
-    private final int MAX_ROW_CNT = 50;
+    private final int MAX_ROW_CNT = 30;
 
     // 전체 데이터 수집
     public void fetchAll(APIType apiType) throws Exception {
