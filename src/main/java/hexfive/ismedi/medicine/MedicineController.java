@@ -26,10 +26,10 @@ public class MedicineController implements MedicineDocs {
     private final MedicineService medicineService;
     private final OpenAPIService openAPIService;
 
-    @GetMapping("/init")
-    public void mergeMedicineData() {
-        medicineService.initMedicineTable();
-    }
+//    @GetMapping("/init")
+//    public void mergeMedicineData() {
+//        medicineService.initMedicineTable();
+//    }
 
     @GetMapping("")
     public APIResponse<List<ResMedicineDto>> searchMedicines(

@@ -14,9 +14,9 @@ import java.util.List;
 
 public interface MedicineDocs {
 
-    @Operation(summary = "의약품 데이터 병합", description = "공공데이터 API에서 받아온 의약품 정보를 DB에 병합합니다.")
-    @GetMapping("/init")
-    void mergeMedicineData();
+//    @Operation(summary = "의약품 데이터 병합", description = "공공데이터 API에서 받아온 의약품 정보를 DB에 병합합니다.")
+//    @GetMapping("/init")
+//    void mergeMedicineData();
 
     @Operation(summary = "의약품 목록 조회", description = "이름과 종류(전문의약품/일반의약품)에 따라 의약품을 검색합니다. 약 이름에 검색 키워드가 포함된 모든 약의 리스트를 반환합니다.")
     @ApiResponses(value = {
